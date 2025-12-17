@@ -1,59 +1,64 @@
 <template>
-  <div class="dashboard">
-    <header>
-      <h1>Dashboard</h1>
-      <button class="logout-btn" @click="handleLogout">Logout</button>
-    </header>
+  <div class="dashboard-wrapper">
+    <div class="dashboard">
+      <header>
+        <h1>Home</h1>
+        <button class="logout-btn" @click="handleLogout">Exit</button>
+      </header>
 
-    <main>
-      <!-- Alarm Card -->
-      <div class="card">
-        <div class="card-header">
-          <span>Alarm System</span>
-        </div>
-        <div class="card-content">
-          <div class="toggle-switch">
-            <div class="toggle-slider" :class="{ active: alarmEnabled }"></div>
-            <span
-              class="toggle-option"
-              :class="{ selected: alarmEnabled }"
-              @click="setAlarmState(true)"
-              >ON</span
-            >
-            <span
-              class="toggle-option"
-              :class="{ selected: !alarmEnabled }"
-              @click="setAlarmState(false)"
-              >OFF</span
-            >
+      <main>
+        <!-- Alarm Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Alarm System</span>
+          </div>
+          <div class="card-content">
+            <div class="toggle-switch">
+              <div
+                class="toggle-slider"
+                :class="{ active: alarmEnabled }"
+              ></div>
+              <span
+                class="toggle-option"
+                :class="{ selected: alarmEnabled }"
+                @click="setAlarmState(true)"
+                >ON</span
+              >
+              <span
+                class="toggle-option"
+                :class="{ selected: !alarmEnabled }"
+                @click="setAlarmState(false)"
+                >OFF</span
+              >
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Temperature Card -->
-      <div class="card">
-        <div class="card-header">
-          <span>Temperature</span>
-        </div>
-        <div class="card-content">
-          <div class="temperature">
-            {{ temperature !== null ? `${temperature}°C` : "..." }}
+        <!-- Temperature Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Temperature</span>
+          </div>
+          <div class="card-content">
+            <div class="temperature">
+              {{ temperature !== null ? `${temperature}°C` : "..." }}
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Humidity Card -->
-      <div class="card">
-        <div class="card-header">
-          <span>Humidity</span>
-        </div>
-        <div class="card-content">
-          <div class="humidity">
-            {{ humidity !== null ? `${humidity}%` : "..." }}
+        <!-- Humidity Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Humidity</span>
+          </div>
+          <div class="card-content">
+            <div class="humidity">
+              {{ humidity !== null ? `${humidity}%` : "..." }}
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -122,18 +127,24 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dashboard {
+.dashboard-wrapper {
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard {
   padding: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 35rem;
+  width: 100%;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #1c1c1c;
 }
@@ -146,8 +157,9 @@ h1 {
   background: transparent;
   border: 1px solid #1c1c1c;
   color: #1c1c1c;
-  padding: 0.5rem 1rem;
-  border-radius: 3rem;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -167,14 +179,11 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
+  margin: 0.75rem 0;
 }
 
 .card-header {
   font-size: 1rem;
-}
-
-.card-content {
 }
 
 .toggle-switch {
@@ -217,12 +226,7 @@ main {
   color: #ffffff;
 }
 
-.temperature {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #1c1c1c;
-}
-
+.temperature,
 .humidity {
   font-size: 1rem;
   font-weight: bold;

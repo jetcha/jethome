@@ -118,10 +118,4 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
-.error {
-  color: #de5b5b;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
 </style>
