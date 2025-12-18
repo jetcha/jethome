@@ -158,7 +158,7 @@ h1 {
   border: 1px solid #1c1c1c;
   color: #1c1c1c;
   font-size: 0.9rem;
-  padding: 0.4rem 0.8rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 1rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -192,7 +192,7 @@ main {
   border: 1px solid #1c1c1c;
   border-radius: 1rem;
   cursor: pointer;
-  width: 6.6rem;
+  width: 6rem;
 }
 
 .toggle-slider {

@@ -10,7 +10,7 @@
 }
 
 body {
-  font-family: Roboto, sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   background: #ffffff;
   color: #1c1c1c;
   min-height: 100vh;
