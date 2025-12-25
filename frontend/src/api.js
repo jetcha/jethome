@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3001";
+const API_BASE = import.meta.env.PROD ? "" : "http://localhost:3001";
 
 function getToken() {
   return localStorage.getItem("jet-home-token");
