@@ -90,3 +90,16 @@ export async function setTestMode(enabled) {
     body: JSON.stringify({ enabled }),
   });
 }
+
+export async function getVapidPublicKey() {
+  const res = await fetch(`${API_BASE}/api/vapidPublicKey`);
+  const data = await res.json();
+  return data.key;
+}
+
+export async function subscribeToPush(subscription) {
+  return api("/api/push/subscribe", {
+    method: "POST",
+    body: JSON.stringify(subscription),
+  });
+}

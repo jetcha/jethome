@@ -1,12 +1,26 @@
 import express from "express";
 import cors from "cors";
 import mqtt from "mqtt";
+import webpush from "web-push";
 
 const app = express();
 const PORT = 3001;
 
 // Config
 const PASSWORD = "900731";
+
+// VAPID keys
+const VAPID_PUBLIC =
+  "BGvl9emPq4-T9ZGV8sO74rhEyGJYE7WjByq1crKKlsgv9cdlTzeWx8a9YMcacXKO0wkaQ4ywJRAVK-JpiC5Gtms";
+const VAPID_PRIVATE = "BQVemg5JDjdst7XHWggPV05EhBaoKz0p5jBY9U17kIE";
+
+webpush.setVapidDetails(
+  "mailto:jet.chang@mailbox.org",
+  VAPID_PUBLIC,
+  VAPID_PRIVATE
+);
+
+const pushSubscriptions = new Set();
 
 // Real-time state from ESP32
 let alarmState = false;
@@ -37,10 +51,18 @@ mqttClient.on("message", (topic, message) => {
       humidity = parseFloat(value);
       break;
     case "jethome/door/state":
+      const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
+      if (!wasDoorOpened && isDoorOpened && alarmState) {
+        sendPushNotification("⚠️ ALERT ⚠️", "Front Door Opened");
+      }
       break;
     case "jethome/window/state":
+      const wasWindowOpened = isWindowOpened;
       isWindowOpened = value === "1";
+      if (!wasWindowOpened && isWindowOpened && alarmState) {
+        sendPushNotification("⚠️ ALERT ⚠️", "Window Opened");
+      }
       break;
     default:
       break;
@@ -50,6 +72,21 @@ mqttClient.on("message", (topic, message) => {
 mqttClient.on("error", (err) => {
   console.error("MQTT error:", err);
 });
+
+// Send push notification to all subscribers
+function sendPushNotification(title, body) {
+  const payload = JSON.stringify({ title, body });
+
+  pushSubscriptions.forEach((sub) => {
+    webpush.sendNotification(JSON.parse(sub), payload).catch((err) => {
+      console.error("Push error:", err);
+      // Remove invalid subscription
+      if (err.statusCode === 410) {
+        pushSubscriptions.delete(sub);
+      }
+    });
+  });
+}
 
 // Token store
 const validTokens = new Set();
@@ -125,6 +162,17 @@ app.get("/api/doorState", requireAuth, (req, res) => {
 
 app.get("/api/windowState", requireAuth, (req, res) => {
   res.json({ opened: isWindowOpened });
+});
+
+app.get("/api/vapidPublicKey", (req, res) => {
+  res.json({ key: VAPID_PUBLIC });
+});
+
+app.post("/api/push/subscribe", requireAuth, (req, res) => {
+  const subscription = JSON.stringify(req.body);
+  pushSubscriptions.add(subscription);
+  console.log("New push subscription");
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
