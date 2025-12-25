@@ -71,3 +71,22 @@ export async function setAlarm(enabled) {
 export async function getClimate() {
   return api("/api/climate");
 }
+
+export async function getDoorState() {
+  return api("/api/doorState");
+}
+
+export async function getWindowState() {
+  return api("/api/windowState");
+}
+
+export async function getTestMode() {
+  return api("/api/testmode");
+}
+
+export async function setTestMode(enabled) {
+  return api("/api/testmode", {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+}

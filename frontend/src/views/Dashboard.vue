@@ -34,6 +34,33 @@
           </div>
         </div>
 
+        <!-- Test Mode Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Test Mode</span>
+          </div>
+          <div class="card-content">
+            <div class="toggle-switch">
+              <div
+                class="toggle-slider"
+                :class="{ active: testModeEnabled }"
+              ></div>
+              <span
+                class="toggle-option"
+                :class="{ selected: testModeEnabled }"
+                @click="setTestModeState(true)"
+                >ON</span
+              >
+              <span
+                class="toggle-option"
+                :class="{ selected: !testModeEnabled }"
+                @click="setTestModeState(false)"
+                >OFF</span
+              >
+            </div>
+          </div>
+        </div>
+
         <!-- Temperature Card -->
         <div class="card">
           <div class="card-header">
@@ -57,6 +84,30 @@
             </div>
           </div>
         </div>
+
+        <!-- Door Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Door Status</span>
+          </div>
+          <div class="card-content">
+            <div class="humidity">
+              {{ isDoorOpened ? "OPEN" : "CLOSED" }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Window Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Window Status</span>
+          </div>
+          <div class="card-content">
+            <div class="humidity">
+              {{ isWindowOpened ? "OPEN" : "CLOSED" }}
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -65,14 +116,26 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { logout, getAlarm, setAlarm, getClimate } from "../api.js";
-
+import {
+  logout,
+  getAlarm,
+  setAlarm,
+  getClimate,
+  getDoorState,
+  getWindowState,
+  getTestMode,
+  setTestMode,
+} from "../api.js";
 const router = useRouter();
 
 const alarmEnabled = ref(false);
 const alarmLoading = ref(false);
 const temperature = ref(null);
 const humidity = ref(null);
+const isDoorOpened = ref(false);
+const isWindowOpened = ref(false);
+const testModeEnabled = ref(false);
+const testModeLoading = ref(false);
 
 let tempInterval = null;
 
@@ -109,16 +172,64 @@ async function fetchClimate() {
   }
 }
 
+async function fetchDoorState() {
+  try {
+    const data = await getDoorState();
+    isDoorOpened.value = data.opened;
+  } catch (e) {
+    console.error("Failed to fetch door state:", e);
+  }
+}
+
+async function fetchWindowState() {
+  try {
+    const data = await getWindowState();
+    isWindowOpened.value = data.opened;
+  } catch (e) {
+    console.error("Failed to fetch window state:", e);
+  }
+}
+
+async function fetchTestMode() {
+  try {
+    const data = await getTestMode();
+    testModeEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to fetch test mode:", e);
+  }
+}
+
+async function setTestModeState(enabled) {
+  if (testModeEnabled.value === enabled || testModeLoading.value) return;
+
+  testModeLoading.value = true;
+  try {
+    const data = await setTestMode(enabled);
+    testModeEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to set test mode:", e);
+  } finally {
+    testModeLoading.value = false;
+  }
+}
+
 async function handleLogout() {
   await logout();
   router.push("/login");
 }
 
+// Update onMounted
 onMounted(() => {
   fetchAlarm();
+  fetchTestMode();
   fetchClimate();
-  // Poll climate every 5 seconds (will replace with WebSocket later)
-  tempInterval = setInterval(fetchClimate, 5000);
+  fetchDoorState();
+  fetchWindowState();
+  tempInterval = setInterval(() => {
+    fetchClimate();
+    fetchDoorState();
+    fetchWindowState();
+  }, 1000);
 });
 
 onUnmounted(() => {
@@ -172,7 +283,7 @@ h1 {
 main {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .card {

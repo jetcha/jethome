@@ -1,18 +1,57 @@
 import express from "express";
 import cors from "cors";
+import mqtt from "mqtt";
 
 const app = express();
 const PORT = 3001;
 
-// Config - change this password!
+// Config
 const PASSWORD = "900731";
 
-// In-memory state (will be replaced by MQTT later)
+// Real-time state from ESP32
 let alarmState = false;
-let temperature = 22.5;
-let humidity = 45;
+let testMode = false;
+let temperature = null;
+let humidity = null;
+let isDoorOpened = false;
+let isWindowOpened = false;
 
-// Simple token store (in production, use proper sessions)
+// MQTT connection
+const mqttClient = mqtt.connect("mqtt://localhost:1883");
+
+mqttClient.on("connect", () => {
+  console.log("Connected to MQTT broker");
+  mqttClient.subscribe("jethome/#", (err) => {
+    if (err) console.error("MQTT subscribe error:", err);
+  });
+});
+
+mqttClient.on("message", (topic, message) => {
+  const value = message.toString();
+
+  switch (topic) {
+    case "jethome/climate/temperature":
+      temperature = parseFloat(value);
+      break;
+    case "jethome/climate/humidity":
+      humidity = parseFloat(value);
+      break;
+    case "jethome/door/state":
+      isDoorOpened = value === "1";
+      break;
+    case "jethome/window/state":
+      isWindowOpened = value === "1";
+      break;
+    default:
+      break;
+  }
+});
+
+mqttClient.on("error", (err) => {
+  console.error("MQTT error:", err);
+});
+
+// Token store
 const validTokens = new Set();
 
 // Middleware
@@ -28,7 +67,6 @@ function requireAuth(req, res, next) {
   next();
 }
 
-// Generate simple token
 function generateToken() {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
@@ -51,7 +89,6 @@ app.post("/api/logout", requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
-// Alarm endpoints
 app.get("/api/alarm", requireAuth, (req, res) => {
   res.json({ enabled: alarmState });
 });
@@ -60,25 +97,35 @@ app.post("/api/alarm", requireAuth, (req, res) => {
   const { enabled } = req.body;
   alarmState = Boolean(enabled);
   console.log(`Alarm ${alarmState ? "ON" : "OFF"}`);
-  // TODO: Send to ESP32 via MQTT
+  mqttClient.publish("jethome/alarm/set", alarmState ? "1" : "0");
   res.json({ enabled: alarmState });
 });
 
-// Temperature and Humidity endpoint
+app.get("/api/testmode", requireAuth, (req, res) => {
+  res.json({ enabled: testMode });
+});
+
+app.post("/api/testmode", requireAuth, (req, res) => {
+  const { enabled } = req.body;
+  testMode = Boolean(enabled);
+  mqttClient.publish("jethome/testmode/set", testMode ? "1" : "0");
+  res.json({ enabled: testMode });
+});
+
 app.get("/api/climate", requireAuth, (req, res) => {
-  const mockTemp = temperature + (Math.random() - 0.5) * 0.5;
-  const mockHumidity = 45 + (Math.random() - 0.5) * 10;
   res.json({
-    temperature: Math.round(mockTemp * 10) / 10,
-    humidity: Math.round(mockHumidity),
+    temperature: temperature,
+    humidity: humidity,
   });
 });
 
-// Simulate temperature changes (for testing)
-setInterval(() => {
-  temperature = 20 + Math.random() * 5;
-  humidity = 40 + Math.random() * 20; // 40-60%
-}, 10000);
+app.get("/api/doorState", requireAuth, (req, res) => {
+  res.json({ opened: isDoorOpened });
+});
+
+app.get("/api/windowState", requireAuth, (req, res) => {
+  res.json({ opened: isWindowOpened });
+});
 
 app.listen(PORT, () => {
   console.log(`Jet Home backend running on http://localhost:${PORT}`);
