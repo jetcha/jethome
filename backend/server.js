@@ -98,14 +98,14 @@ mqttClient.on("message", async (topic, message) => {
       mqttClient.publish("jethome/light/dark", dark ? "1" : "0");
 
       if (!wasDoorOpened && isDoorOpened && alarmState) {
-        sendPushNotification("⚠️ ALERT ⚠️", "Front Door Opened");
+        sendPushNotification("Jet Home", "⚠️ Front Door Opened ⚠️");
       }
       break;
     case "jethome/window/state":
       const wasWindowOpened = isWindowOpened;
       isWindowOpened = value === "1";
       if (!wasWindowOpened && isWindowOpened && alarmState) {
-        sendPushNotification("⚠️ ALERT ⚠️", "Window Opened");
+        sendPushNotification("Jet Home", "⚠️ Window Opened ⚠️");
       }
       break;
     default:
@@ -179,6 +179,12 @@ app.post("/api/alarm", requireAuth, (req, res) => {
   alarmState = Boolean(enabled);
   console.log(`Alarm ${alarmState ? "ON" : "OFF"}`);
   mqttClient.publish("jethome/alarm/set", alarmState ? "1" : "0");
+
+  sendPushNotification(
+    "Jet Home",
+    alarmState ? "Alarm system turned ON" : "Alarm system turned OFF"
+  );
+
   res.json({ enabled: alarmState });
 });
 

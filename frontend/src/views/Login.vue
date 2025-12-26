@@ -5,6 +5,7 @@
         <input
           v-model="password"
           type="password"
+          inputmode="numeric"
           placeholder="CODE"
           :disabled="loading"
           autofocus

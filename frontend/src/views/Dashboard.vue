@@ -320,6 +320,8 @@ onMounted(() => {
     fetchClimate();
     fetchDoorState();
     fetchWindowState();
+    fetchAlarm();
+    fetchTestMode();
   }, 1000);
 });
 
