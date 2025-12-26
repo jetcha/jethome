@@ -5,12 +5,12 @@
         <input
           v-model="password"
           type="password"
-          placeholder="Code"
+          placeholder="CODE"
           :disabled="loading"
           autofocus
         />
         <button type="submit" :disabled="loading">
-          {{ loading ? "Logging in..." : "Enter" }}
+          {{ loading ? "LOGGING IN..." : "ENTER" }}
         </button>
       </form>
     </div>

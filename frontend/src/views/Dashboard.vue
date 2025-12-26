@@ -3,7 +3,7 @@
     <div class="dashboard">
       <header>
         <h1>Home</h1>
-        <button class="logout-btn" @click="handleLogout">Exit</button>
+        <button class="logout-btn" @click="handleLogout">EXIT</button>
       </header>
 
       <main>
