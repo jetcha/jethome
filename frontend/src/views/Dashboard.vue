@@ -108,6 +108,26 @@
             </div>
           </div>
         </div>
+
+        <!-- Sunrise Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Sunrise</span>
+          </div>
+          <div class="card-content">
+            <div class="sun-time">{{ sunrise ?? "..." }}</div>
+          </div>
+        </div>
+
+        <!-- Sunset Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Sunset</span>
+          </div>
+          <div class="card-content">
+            <div class="sun-time">{{ sunset ?? "..." }}</div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -127,6 +147,7 @@ import {
   setTestMode,
   getVapidPublicKey,
   subscribeToPush,
+  getSunTimes,
 } from "../api.js";
 const router = useRouter();
 
@@ -138,6 +159,8 @@ const isDoorOpened = ref(false);
 const isWindowOpened = ref(false);
 const testModeEnabled = ref(false);
 const testModeLoading = ref(false);
+const sunrise = ref(null);
+const sunset = ref(null);
 
 let tempInterval = null;
 
@@ -215,6 +238,28 @@ async function setTestModeState(enabled) {
   }
 }
 
+async function fetchSunTimes() {
+  try {
+    const data = await getSunTimes();
+    sunrise.value = data.sunrise
+      ? new Date(data.sunrise).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      : null;
+    sunset.value = data.sunset
+      ? new Date(data.sunset).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      : null;
+  } catch (e) {
+    console.error("Failed to fetch sun times:", e);
+  }
+}
+
 async function handleLogout() {
   await logout();
   router.push("/login");
@@ -264,12 +309,13 @@ function urlBase64ToUint8Array(base64String) {
 
 // Update onMounted
 onMounted(() => {
+  setupPushNotifications();
   fetchAlarm();
   fetchTestMode();
   fetchClimate();
   fetchDoorState();
   fetchWindowState();
-  setupPushNotifications();
+  fetchSunTimes();
   tempInterval = setInterval(() => {
     fetchClimate();
     fetchDoorState();
@@ -383,7 +429,8 @@ main {
 }
 
 .temperature,
-.humidity {
+.humidity,
+.sun-time {
   font-size: 1rem;
   font-weight: bold;
   color: #1c1c1c;

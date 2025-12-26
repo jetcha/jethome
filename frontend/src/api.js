@@ -103,3 +103,7 @@ export async function subscribeToPush(subscription) {
     body: JSON.stringify(subscription),
   });
 }
+
+export async function getSunTimes() {
+  return api("/api/isDark");
+}
