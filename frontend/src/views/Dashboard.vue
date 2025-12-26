@@ -284,16 +284,16 @@ onUnmounted(() => {
 
 <style scoped>
 .dashboard-wrapper {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .dashboard {
-  padding: 1rem;
   max-width: 35rem;
   width: 100%;
+  padding: 3rem;
 }
 
 header {
