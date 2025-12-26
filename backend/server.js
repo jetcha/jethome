@@ -30,6 +30,40 @@ let humidity = null;
 let isDoorOpened = false;
 let isWindowOpened = false;
 
+// Sunrise/sunset data (Helmond coordinates)
+const LATITUDE = 51.4416;
+const LONGITUDE = 5.4697;
+let sunriseTime = null;
+let sunsetTime = null;
+
+async function fetchSunTimes() {
+  try {
+    const res = await fetch(
+      `https://api.sunrise-sunset.org/json?lat=${LATITUDE}&lng=${LONGITUDE}&formatted=0`
+    );
+    const data = await res.json();
+    sunriseTime = new Date(data.results.sunrise);
+    sunsetTime = new Date(data.results.sunset);
+    console.log(
+      `Sun times updated: rise=${sunriseTime.toLocaleTimeString()}, set=${sunsetTime.toLocaleTimeString()}`
+    );
+  } catch (err) {
+    console.error("Failed to fetch sun times:", err);
+  }
+}
+
+function isDark() {
+  if (!sunriseTime || !sunsetTime) {
+    return false;
+  }
+  const now = new Date();
+  return now < sunriseTime || now > sunsetTime;
+}
+
+// Fetch on startup and every 6 hours
+fetchSunTimes();
+setInterval(fetchSunTimes, 6 * 60 * 60 * 1000);
+
 // MQTT connection
 const mqttClient = mqtt.connect("mqtt://localhost:1883");
 
@@ -53,6 +87,10 @@ mqttClient.on("message", (topic, message) => {
     case "jethome/door/state":
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
+
+      // Send dark status whenever door state changes
+      mqttClient.publish("jethome/light/dark", isDark() ? "1" : "0");
+
       if (!wasDoorOpened && isDoorOpened && alarmState) {
         sendPushNotification("⚠️ ALERT ⚠️", "Front Door Opened");
       }
@@ -92,7 +130,7 @@ function sendPushNotification(title, body) {
 const validTokens = new Set();
 
 // Middleware
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 // Auth middleware
@@ -162,6 +200,14 @@ app.get("/api/doorState", requireAuth, (req, res) => {
 
 app.get("/api/windowState", requireAuth, (req, res) => {
   res.json({ opened: isWindowOpened });
+});
+
+app.get("/api/isDark", requireAuth, (req, res) => {
+  res.json({
+    dark: isDark(),
+    sunrise: sunriseTime?.toISOString(),
+    sunset: sunsetTime?.toISOString(),
+  });
 });
 
 app.get("/api/vapidPublicKey", (req, res) => {
