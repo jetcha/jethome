@@ -35,6 +35,7 @@ const LATITUDE = 51.4416;
 const LONGITUDE = 5.4697;
 let sunriseTime = null;
 let sunsetTime = null;
+let lastFetchDate = null;
 
 async function fetchSunTimes() {
   try {
@@ -44,6 +45,7 @@ async function fetchSunTimes() {
     const data = await res.json();
     sunriseTime = new Date(data.results.sunrise);
     sunsetTime = new Date(data.results.sunset);
+    lastFetchDate = new Date().toDateString();
     console.log(
       `Sun times updated: rise=${sunriseTime.toLocaleTimeString()}, set=${sunsetTime.toLocaleTimeString()}`
     );
@@ -52,7 +54,12 @@ async function fetchSunTimes() {
   }
 }
 
-function isDark() {
+async function isDark() {
+  const today = new Date().toDateString();
+  if (lastFetchDate !== today) {
+    await fetchSunTimes();
+  }
+
   if (!sunriseTime || !sunsetTime) {
     return false;
   }
@@ -60,9 +67,8 @@ function isDark() {
   return now < sunriseTime || now > sunsetTime;
 }
 
-// Fetch on startup and every 6 hours
+// Fetch on startup
 fetchSunTimes();
-setInterval(fetchSunTimes, 6 * 60 * 60 * 1000);
 
 // MQTT connection
 const mqttClient = mqtt.connect("mqtt://localhost:1883");
@@ -74,7 +80,7 @@ mqttClient.on("connect", () => {
   });
 });
 
-mqttClient.on("message", (topic, message) => {
+mqttClient.on("message", async (topic, message) => {
   const value = message.toString();
 
   switch (topic) {
@@ -88,8 +94,8 @@ mqttClient.on("message", (topic, message) => {
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
 
-      // Send dark status whenever door state changes
-      mqttClient.publish("jethome/light/dark", isDark() ? "1" : "0");
+      const dark = await isDark();
+      mqttClient.publish("jethome/light/dark", dark ? "1" : "0");
 
       if (!wasDoorOpened && isDoorOpened && alarmState) {
         sendPushNotification("⚠️ ALERT ⚠️", "Front Door Opened");
