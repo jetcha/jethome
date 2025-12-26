@@ -10,10 +10,20 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  overflow-y: auto;
+}
+
 body {
   font-family: "Space Grotesk", sans-serif;
   background: #ffffff;
   color: #1c1c1c;
-  min-height: 100vh;
 }
 </style>
