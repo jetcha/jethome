@@ -56,8 +56,8 @@ async function handleLogin() {
 
 .login-box {
   text-align: center;
-  width: 18rem;
-  min-width: 15rem;
+  width: 20rem;
+  min-width: 18rem;
   padding: 3rem;
 }
 
@@ -91,7 +91,7 @@ input {
   border-radius: 3rem;
   color: #1c1c1c;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   text-align: center;
 }
 
