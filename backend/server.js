@@ -7,7 +7,7 @@ const app = express();
 const PORT = 3001;
 
 // Config
-const PASSWORD = "900731";
+const PASSWORDS = ["5656", "0217"];
 
 // VAPID keys
 const VAPID_PUBLIC =
@@ -155,7 +155,7 @@ function generateToken() {
 // Routes
 app.post("/api/login", (req, res) => {
   const { password } = req.body;
-  if (password === PASSWORD) {
+  if (PASSWORDS.includes(password)) {
     const token = generateToken();
     validTokens.add(token);
     res.json({ success: true, token });
