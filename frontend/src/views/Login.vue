@@ -59,7 +59,7 @@ async function handleLogin() {
   text-align: center;
   width: 20rem;
   min-width: 18rem;
-  padding: 2.5rem;
+  padding: 2.3rem;
 }
 
 .login-box.shake {

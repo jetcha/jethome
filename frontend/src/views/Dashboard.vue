@@ -373,7 +373,7 @@ onUnmounted(() => {
 .dashboard {
   max-width: 35rem;
   width: 100%;
-  padding: 2.5rem;
+  padding: 2.3rem;
 }
 
 header {
