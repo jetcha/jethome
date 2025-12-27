@@ -9,6 +9,7 @@ frontend/dev-dist/
 
 # IDE
 .vscode/
+*.code-workspace
 
 # Build output
 dist/
@@ -21,3 +22,4 @@ dist/
 
 # PlatformIO
 .pio/
+compile_commands.json
