@@ -43,9 +43,14 @@ export async function login(password) {
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Login failed");
+  if (!res.ok) {
+    throw new Error(data.error || "Login failed");
+  }
 
-  setToken(data.token);
+  if (data.token) {
+    setToken(data.token);
+    localStorage.setItem("jet-home-role", data.role);
+  }
   return data;
 }
 
@@ -54,7 +59,12 @@ export async function logout() {
     await api("/api/logout", { method: "POST" });
   } finally {
     setToken(null);
+    localStorage.removeItem("jet-home-role");
   }
+}
+
+export function getUserRole() {
+  return localStorage.getItem("jet-home-role");
 }
 
 export async function getAlarm() {

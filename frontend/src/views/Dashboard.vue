@@ -3,7 +3,17 @@
     <div class="dashboard">
       <header>
         <h1>Home</h1>
-        <button class="logout-btn" @click="handleLogout">EXIT</button>
+        <div class="header-actions">
+          <button
+            v-if="isAdmin"
+            class="test-mode-btn"
+            :class="{ active: testModeEnabled }"
+            @click="setTestModeState(!testModeEnabled)"
+          >
+            TEST
+          </button>
+          <button class="logout-btn" @click="handleLogout">EXIT</button>
+        </div>
       </header>
 
       <main>
@@ -28,33 +38,6 @@
                 class="toggle-option"
                 :class="{ selected: !alarmEnabled }"
                 @click="setAlarmState(false)"
-                >OFF</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Test Mode Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Test Mode</span>
-          </div>
-          <div class="card-content">
-            <div class="toggle-switch">
-              <div
-                class="toggle-slider"
-                :class="{ active: testModeEnabled }"
-              ></div>
-              <span
-                class="toggle-option"
-                :class="{ selected: testModeEnabled }"
-                @click="setTestModeState(true)"
-                >ON</span
-              >
-              <span
-                class="toggle-option"
-                :class="{ selected: !testModeEnabled }"
-                @click="setTestModeState(false)"
                 >OFF</span
               >
             </div>
@@ -137,6 +120,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
+  getUserRole,
   logout,
   getAlarm,
   setAlarm,
@@ -151,6 +135,7 @@ import {
 } from "../api.js";
 const router = useRouter();
 
+const isAdmin = ref(false);
 const alarmEnabled = ref(false);
 const alarmLoading = ref(false);
 const temperature = ref(null);
@@ -309,19 +294,27 @@ function urlBase64ToUint8Array(base64String) {
 
 // Update onMounted
 onMounted(() => {
+  isAdmin.value = getUserRole() === "admin";
+
   setupPushNotifications();
   fetchAlarm();
-  fetchTestMode();
   fetchClimate();
   fetchDoorState();
   fetchWindowState();
   fetchSunTimes();
+
+  if (isAdmin.value) {
+    fetchTestMode();
+  }
+
   tempInterval = setInterval(() => {
     fetchClimate();
     fetchDoorState();
     fetchWindowState();
     fetchAlarm();
-    fetchTestMode();
+    if (isAdmin.value) {
+      fetchTestMode();
+    }
   }, 1000);
 });
 
@@ -357,7 +350,12 @@ h1 {
   font-size: 1.5rem;
 }
 
-.logout-btn {
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.test-mode-btn {
   background: transparent;
   border: 1px solid #1c1c1c;
   color: #1c1c1c;
@@ -368,9 +366,20 @@ h1 {
   transition: all 0.2s;
 }
 
-.logout-btn:hover {
-  border-color: #1c1c1cd1;
-  color: #1c1c1cd1;
+.test-mode-btn.active {
+  background: #1c1c1c;
+  color: #ffffff;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #1c1c1c;
+  color: #1c1c1c;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 main {

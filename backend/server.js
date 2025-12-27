@@ -6,8 +6,12 @@ import webpush from "web-push";
 const app = express();
 const PORT = 3001;
 
-// Config
-const PASSWORDS = ["5656", "0217"];
+// Token store: token -> { role: 'admin' | 'user' }
+const validTokens = new Map();
+const PASSWORD_ROLES = {
+  ["5656"]: "admin",
+  ["0217"]: "user",
+};
 
 // VAPID keys
 const VAPID_PUBLIC =
@@ -132,9 +136,6 @@ function sendPushNotification(title, body) {
   });
 }
 
-// Token store
-const validTokens = new Set();
-
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
@@ -145,6 +146,7 @@ function requireAuth(req, res, next) {
   if (!token || !validTokens.has(token)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+  req.userRole = validTokens.get(token).role;
   next();
 }
 
@@ -155,10 +157,11 @@ function generateToken() {
 // Routes
 app.post("/api/login", (req, res) => {
   const { password } = req.body;
-  if (PASSWORDS.includes(password)) {
+  const role = PASSWORD_ROLES[password];
+  if (role) {
     const token = generateToken();
-    validTokens.add(token);
-    res.json({ success: true, token });
+    validTokens.set(token, { role });
+    res.json({ success: true, token, role });
   } else {
     res.status(401).json({ error: "Wrong password" });
   }
@@ -189,10 +192,16 @@ app.post("/api/alarm", requireAuth, (req, res) => {
 });
 
 app.get("/api/testmode", requireAuth, (req, res) => {
+  if (req.userRole !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   res.json({ enabled: testMode });
 });
 
 app.post("/api/testmode", requireAuth, (req, res) => {
+  if (req.userRole !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   const { enabled } = req.body;
   testMode = Boolean(enabled);
   mqttClient.publish("jethome/testmode/set", testMode ? "1" : "0");
