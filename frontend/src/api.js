@@ -82,6 +82,10 @@ export async function getClimate() {
   return api("/api/climate");
 }
 
+export async function getBalconyClimate() {
+  return api("/api/balconyClimate");
+}
+
 export async function getDoorState() {
   return api("/api/doorState");
 }

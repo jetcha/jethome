@@ -31,6 +31,8 @@ let alarmState = false;
 let testMode = false;
 let temperature = null;
 let humidity = null;
+let balconyTemperature = null;
+let balconyHumidity = null;
 let isDoorOpened = false;
 let isWindowOpened = false;
 
@@ -93,6 +95,12 @@ mqttClient.on("message", async (topic, message) => {
       break;
     case "jethome/climate/humidity":
       humidity = parseFloat(value);
+      break;
+    case "jethome/balcony/temperature":
+      balconyTemperature = parseFloat(value);
+      break;
+    case "jethome/balcony/humidity":
+      balconyHumidity = parseFloat(value);
       break;
     case "jethome/door/state":
       const wasDoorOpened = isDoorOpened;
@@ -212,6 +220,13 @@ app.get("/api/climate", requireAuth, (req, res) => {
   res.json({
     temperature: temperature,
     humidity: humidity,
+  });
+});
+
+app.get("/api/balconyClimate", requireAuth, (req, res) => {
+  res.json({
+    temperature: balconyTemperature,
+    humidity: balconyHumidity,
   });
 });
 

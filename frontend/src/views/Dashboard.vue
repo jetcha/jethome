@@ -68,6 +68,30 @@
           </div>
         </div>
 
+        <!-- Balcony Temperature Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Balcony Temp</span>
+          </div>
+          <div class="card-content">
+            <div class="temperature">
+              {{ balconyTemperature !== null ? `${balconyTemperature}°C` : "..." }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Balcony Humidity Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Balcony Humidity</span>
+          </div>
+          <div class="card-content">
+            <div class="humidity">
+              {{ balconyHumidity !== null ? `${balconyHumidity}%` : "..." }}
+            </div>
+          </div>
+        </div>
+
         <!-- Door Card -->
         <div class="card">
           <div class="card-header">
@@ -125,6 +149,7 @@ import {
   getAlarm,
   setAlarm,
   getClimate,
+  getBalconyClimate,
   getDoorState,
   getWindowState,
   getTestMode,
@@ -140,6 +165,8 @@ const alarmEnabled = ref(false);
 const alarmLoading = ref(false);
 const temperature = ref(null);
 const humidity = ref(null);
+const balconyTemperature = ref(null);
+const balconyHumidity = ref(null);
 const isDoorOpened = ref(false);
 const isWindowOpened = ref(false);
 const testModeEnabled = ref(false);
@@ -179,6 +206,16 @@ async function fetchClimate() {
     humidity.value = data.humidity;
   } catch (e) {
     console.error("Failed to fetch climate:", e);
+  }
+}
+
+async function fetchBalconyClimate() {
+  try {
+    const data = await getBalconyClimate();
+    balconyTemperature.value = data.temperature;
+    balconyHumidity.value = data.humidity;
+  } catch (e) {
+    console.error("Failed to fetch balcony climate:", e);
   }
 }
 
@@ -299,6 +336,7 @@ onMounted(() => {
   setupPushNotifications();
   fetchAlarm();
   fetchClimate();
+  fetchBalconyClimate();
   fetchDoorState();
   fetchWindowState();
   fetchSunTimes();
@@ -309,6 +347,7 @@ onMounted(() => {
 
   tempInterval = setInterval(() => {
     fetchClimate();
+    fetchBalconyClimate();
     fetchDoorState();
     fetchWindowState();
     fetchAlarm();
