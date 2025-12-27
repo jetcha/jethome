@@ -14,7 +14,8 @@
 // A single instance shared info between modules
 static State appState;
 
-void setup() {
+void setup()
+{
     Serial.begin(SERIAL_BAUDRATE);
 
     // Initialize all modules
@@ -30,7 +31,8 @@ void setup() {
     initMQTT(&appState);
 }
 
-void loop() {
+void loop()
+{
     // Handle OTA updates
     handleOTA();
 

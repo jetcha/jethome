@@ -5,7 +5,8 @@
 #include "ota_manager.h"
 #include "climate_sensor.h"
 
-void setup() {
+void setup()
+{
     Serial.begin(SERIAL_BAUDRATE);
 
     // Initialize all modules
@@ -17,7 +18,8 @@ void setup() {
     initMQTT();
 }
 
-void loop() {
+void loop()
+{
     // Handle OTA updates
     handleOTA();
 

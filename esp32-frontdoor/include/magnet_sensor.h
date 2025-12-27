@@ -4,6 +4,6 @@
 #include "state.h"
 
 void initMagnetSensor();
-void updateMagnetSensorStatus(State& state);
+void updateMagnetSensorStatus(State &state);
 
 #endif // MAGNET_SENSOR_H

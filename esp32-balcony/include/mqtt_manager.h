@@ -5,6 +5,6 @@
 
 void initMQTT();
 void maintainMQTTConnection();
-void publishMessageMQTT(const char* topic, const char* payload);
+void publishMessageMQTT(const char *topic, const char *payload);
 
 #endif // MQTT_MANAGER_H

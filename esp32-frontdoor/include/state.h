@@ -10,22 +10,23 @@
 // This struct holds all state that needs to be shared between modules.
 // A single instance is created in main.cpp and passed by reference to modules.
 
-struct State {
+struct State
+{
     // Alarm system
     bool isAlarmEnabled = false;
     bool isTestMode = false;
-    
+
     // Door and window sensors
     bool isDoorOpen = false;
     bool isWindowOpen = false;
     bool wasDoorOpen = false;
-    
+
     // Siren
     bool isSirenActive = false;
     bool isSirenCountdownStarted = false;
     unsigned long sirenStartTimestampMs = 0;
     unsigned long sirenDurationMs = SIREN_DURATION_MS;
-    
+
     // Light strip
     bool isDark = false;
     bool isLightStripOn = false;

@@ -51,7 +51,9 @@
           </div>
           <div class="card-content">
             <div class="temperature">
-              {{ temperatureIndoor !== null ? `${temperatureIndoor}°C` : "..." }}
+              {{
+                temperatureIndoor !== null ? `${temperatureIndoor}°C` : "..."
+              }}
             </div>
           </div>
         </div>
@@ -75,7 +77,9 @@
           </div>
           <div class="card-content">
             <div class="temperature">
-              {{ temperatureOutdoor !== null ? `${temperatureOutdoor}°C` : "..." }}
+              {{
+                temperatureOutdoor !== null ? `${temperatureOutdoor}°C` : "..."
+              }}
             </div>
           </div>
         </div>

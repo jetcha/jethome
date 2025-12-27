@@ -63,7 +63,7 @@ let lastOutdoorClimateSaveTimestamp = 0;
 
 function saveClimateReading(location, temperature, humidity) {
   if (temperature === null || humidity === null) return;
-  
+
   const stmt = db.prepare(
     "INSERT INTO climate_history (location, temperature, humidity) VALUES (?, ?, ?)"
   );
@@ -117,13 +117,16 @@ mqttClient.on("message", async (topic, message) => {
   const value = message.toString();
 
   switch (topic) {
-    case "jethome/frontdoor/climate":
+    case "jethome/frontdoor/climate": {
       try {
         const data = JSON.parse(value);
         temperatureIndoor = data.temperature;
         humidityIndoor = data.humidity;
-        
-        if (Date.now() - lastIndoorClimateSaveTimestamp >= CLIMATE_DATA_SAVE_INTERVAL_MS) {
+
+        if (
+          Date.now() - lastIndoorClimateSaveTimestamp >=
+          CLIMATE_DATA_SAVE_INTERVAL_MS
+        ) {
           saveClimateReading("indoor", temperatureIndoor, humidityIndoor);
           lastIndoorClimateSaveTimestamp = Date.now();
           console.log("Saved indoor climate data");
@@ -132,14 +135,17 @@ mqttClient.on("message", async (topic, message) => {
         console.error("Failed to parse indoor climate:", e);
       }
       break;
-
-    case "jethome/balcony/climate":
+    }
+    case "jethome/balcony/climate": {
       try {
         const data = JSON.parse(value);
         temperatureOutdoor = data.temperature;
         humidityOutdoor = data.humidity;
-        
-        if (Date.now() - lastOutdoorClimateSaveTimestamp >= CLIMATE_DATA_SAVE_INTERVAL_MS) {
+
+        if (
+          Date.now() - lastOutdoorClimateSaveTimestamp >=
+          CLIMATE_DATA_SAVE_INTERVAL_MS
+        ) {
           saveClimateReading("outdoor", temperatureOutdoor, humidityOutdoor);
           lastOutdoorClimateSaveTimestamp = Date.now();
           console.log("Saved outdoor climate data");
@@ -148,8 +154,8 @@ mqttClient.on("message", async (topic, message) => {
         console.error("Failed to parse outdoor climate:", e);
       }
       break;
-
-    case "jethome/door/state":
+    }
+    case "jethome/door/state": {
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
 
@@ -160,15 +166,18 @@ mqttClient.on("message", async (topic, message) => {
         sendPushNotification("Jet Home", "⚠️ Front Door Opened ⚠️");
       }
       break;
-    case "jethome/window/state":
+    }
+    case "jethome/window/state": {
       const wasWindowOpened = isWindowOpened;
       isWindowOpened = value === "1";
       if (!wasWindowOpened && isWindowOpened && alarmState) {
         sendPushNotification("Jet Home", "⚠️ Window Opened ⚠️");
       }
       break;
-    default:
+    }
+    default: {
       break;
+    }
   }
 });
 
