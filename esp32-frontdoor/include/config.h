@@ -31,8 +31,8 @@
 #define MQTT_TOPIC_LIGHT_DARK "jethome/light/dark"
 
 // MQTT Topics - Publish
-#define MQTT_TOPIC_TEMPERATURE "jethome/climate/temperature"
-#define MQTT_TOPIC_HUMIDITY "jethome/climate/humidity"
+#define MQTT_TOPIC_TEMPERATURE "jethome/frontdoor/temperature"
+#define MQTT_TOPIC_HUMIDITY "jethome/frontdoor/humidity"
 #define MQTT_TOPIC_DOOR_STATE "jethome/door/state"
 #define MQTT_TOPIC_WINDOW_STATE "jethome/window/state"
 

@@ -29,10 +29,10 @@ const pushSubscriptions = new Set();
 // Real-time state from ESP32
 let alarmState = false;
 let testMode = false;
-let temperature = null;
-let humidity = null;
-let balconyTemperature = null;
-let balconyHumidity = null;
+let temperatureIndoor = null;
+let humidityIndoor = null;
+let temperatureOutdoor = null;
+let humidityOutdoor = null;
 let isDoorOpened = false;
 let isWindowOpened = false;
 
@@ -90,17 +90,17 @@ mqttClient.on("message", async (topic, message) => {
   const value = message.toString();
 
   switch (topic) {
-    case "jethome/climate/temperature":
-      temperature = parseFloat(value);
+    case "jethome/frontdoor/temperature":
+      temperatureIndoor = parseFloat(value);
       break;
-    case "jethome/climate/humidity":
-      humidity = parseFloat(value);
+    case "jethome/frontdoor/humidity":
+      humidityIndoor = parseFloat(value);
       break;
     case "jethome/balcony/temperature":
-      balconyTemperature = parseFloat(value);
+      temperatureOutdoor = parseFloat(value);
       break;
     case "jethome/balcony/humidity":
-      balconyHumidity = parseFloat(value);
+      humidityOutdoor = parseFloat(value);
       break;
     case "jethome/door/state":
       const wasDoorOpened = isDoorOpened;
@@ -216,17 +216,17 @@ app.post("/api/testmode", requireAuth, (req, res) => {
   res.json({ enabled: testMode });
 });
 
-app.get("/api/climate", requireAuth, (req, res) => {
+app.get("/api/frontdoor/climate", requireAuth, (req, res) => {
   res.json({
-    temperature: temperature,
-    humidity: humidity,
+    temperature: temperatureIndoor,
+    humidity: humidityIndoor,
   });
 });
 
-app.get("/api/balconyClimate", requireAuth, (req, res) => {
+app.get("/api/balcony/climate", requireAuth, (req, res) => {
   res.json({
-    temperature: balconyTemperature,
-    humidity: balconyHumidity,
+    temperature: temperatureOutdoor,
+    humidity: humidityOutdoor,
   });
 });
 

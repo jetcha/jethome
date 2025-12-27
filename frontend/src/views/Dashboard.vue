@@ -44,50 +44,50 @@
           </div>
         </div>
 
-        <!-- Temperature Card -->
+        <!-- Temperature Indoor Card -->
         <div class="card">
           <div class="card-header">
-            <span>Temperature</span>
+            <span>Indoor Temperature</span>
           </div>
           <div class="card-content">
             <div class="temperature">
-              {{ temperature !== null ? `${temperature}°C` : "..." }}
+              {{ temperatureIndoor !== null ? `${temperatureIndoor}°C` : "..." }}
             </div>
           </div>
         </div>
 
-        <!-- Humidity Card -->
+        <!-- Humidity Indoor Card -->
         <div class="card">
           <div class="card-header">
-            <span>Humidity</span>
+            <span>Indoor Humidity</span>
           </div>
           <div class="card-content">
             <div class="humidity">
-              {{ humidity !== null ? `${humidity}%` : "..." }}
+              {{ humidityIndoor !== null ? `${humidityIndoor}%` : "..." }}
             </div>
           </div>
         </div>
 
-        <!-- Balcony Temperature Card -->
+        <!-- Temperature Outdoor Card -->
         <div class="card">
           <div class="card-header">
-            <span>Balcony Temp</span>
+            <span>Outdoor Temperature</span>
           </div>
           <div class="card-content">
             <div class="temperature">
-              {{ balconyTemperature !== null ? `${balconyTemperature}°C` : "..." }}
+              {{ temperatureOutdoor !== null ? `${temperatureOutdoor}°C` : "..." }}
             </div>
           </div>
         </div>
 
-        <!-- Balcony Humidity Card -->
+        <!-- Humidity Outdoor Card -->
         <div class="card">
           <div class="card-header">
-            <span>Balcony Humidity</span>
+            <span>Outdoor Humidity</span>
           </div>
           <div class="card-content">
             <div class="humidity">
-              {{ balconyHumidity !== null ? `${balconyHumidity}%` : "..." }}
+              {{ humidityOutdoor !== null ? `${humidityOutdoor}%` : "..." }}
             </div>
           </div>
         </div>
@@ -148,8 +148,8 @@ import {
   logout,
   getAlarm,
   setAlarm,
-  getClimate,
-  getBalconyClimate,
+  getClimateIndoor,
+  getClimateOutdoor,
   getDoorState,
   getWindowState,
   getTestMode,
@@ -163,10 +163,10 @@ const router = useRouter();
 const isAdmin = ref(false);
 const alarmEnabled = ref(false);
 const alarmLoading = ref(false);
-const temperature = ref(null);
-const humidity = ref(null);
-const balconyTemperature = ref(null);
-const balconyHumidity = ref(null);
+const temperatureIndoor = ref(null);
+const humidityIndoor = ref(null);
+const temperatureOutdoor = ref(null);
+const humidityOutdoor = ref(null);
 const isDoorOpened = ref(false);
 const isWindowOpened = ref(false);
 const testModeEnabled = ref(false);
@@ -199,23 +199,23 @@ async function setAlarmState(enabled) {
   }
 }
 
-async function fetchClimate() {
+async function fetchClimateIndoor() {
   try {
-    const data = await getClimate();
-    temperature.value = data.temperature;
-    humidity.value = data.humidity;
+    const data = await getClimateIndoor();
+    temperatureIndoor.value = data.temperature;
+    humidityIndoor.value = data.humidity;
   } catch (e) {
-    console.error("Failed to fetch climate:", e);
+    console.error("Failed to fetch indoor limate:", e);
   }
 }
 
-async function fetchBalconyClimate() {
+async function fetchClimateOutdoor() {
   try {
-    const data = await getBalconyClimate();
-    balconyTemperature.value = data.temperature;
-    balconyHumidity.value = data.humidity;
+    const data = await getClimateOutdoor();
+    temperatureOutdoor.value = data.temperature;
+    humidityOutdoor.value = data.humidity;
   } catch (e) {
-    console.error("Failed to fetch balcony climate:", e);
+    console.error("Failed to fetch outdoor climate:", e);
   }
 }
 
@@ -335,8 +335,8 @@ onMounted(() => {
 
   setupPushNotifications();
   fetchAlarm();
-  fetchClimate();
-  fetchBalconyClimate();
+  fetchClimateIndoor();
+  fetchClimateOutdoor();
   fetchDoorState();
   fetchWindowState();
   fetchSunTimes();
@@ -346,8 +346,8 @@ onMounted(() => {
   }
 
   tempInterval = setInterval(() => {
-    fetchClimate();
-    fetchBalconyClimate();
+    fetchClimateIndoor();
+    fetchClimateOutdoor();
     fetchDoorState();
     fetchWindowState();
     fetchAlarm();
@@ -373,7 +373,7 @@ onUnmounted(() => {
 .dashboard {
   max-width: 35rem;
   width: 100%;
-  padding: 3rem;
+  padding: 2.5rem;
 }
 
 header {

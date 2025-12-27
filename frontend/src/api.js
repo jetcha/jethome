@@ -78,12 +78,12 @@ export async function setAlarm(enabled) {
   });
 }
 
-export async function getClimate() {
-  return api("/api/climate");
+export async function getClimateIndoor() {
+  return api("/api/frontdoor/climate");
 }
 
-export async function getBalconyClimate() {
-  return api("/api/balconyClimate");
+export async function getClimateOutdoor() {
+  return api("/api/balcony/climate");
 }
 
 export async function getDoorState() {
