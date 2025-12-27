@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import mqtt from "mqtt";
 import webpush from "web-push";
+import Database from "better-sqlite3";
 
 const app = express();
 const PORT = 3001;
@@ -42,6 +43,32 @@ const LONGITUDE = 5.4697;
 let sunriseTime = null;
 let sunsetTime = null;
 let lastFetchDate = null;
+
+// Database setup
+const db = new Database("climate_history.db");
+db.exec(`
+  CREATE TABLE IF NOT EXISTS climate_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    location TEXT NOT NULL,
+    temperature REAL,
+    humidity REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Save interval: every 5 minutes
+const SAVE_INTERVAL_MS = 300000;
+let lastIndoorSaveTimestamp = 0;
+let lastOutdoorSaveTimestamp = 0;
+
+function saveClimateReading(location, temperature, humidity) {
+  if (temperature === null || humidity === null) return;
+  
+  const stmt = db.prepare(
+    "INSERT INTO climate_history (location, temperature, humidity) VALUES (?, ?, ?)"
+  );
+  stmt.run(location, temperature, humidity);
+}
 
 async function fetchSunTimes() {
   try {
@@ -92,12 +119,22 @@ mqttClient.on("message", async (topic, message) => {
   switch (topic) {
     case "jethome/frontdoor/temperature":
       temperatureIndoor = parseFloat(value);
+      if (Date.now() - lastIndoorSaveTimestamp >= SAVE_INTERVAL_MS) {
+        saveClimateReading("indoor", temperatureIndoor, humidityIndoor);
+        lastIndoorSaveTimestamp = Date.now();
+        console.log("Saved indoor climate data");
+      }
       break;
     case "jethome/frontdoor/humidity":
       humidityIndoor = parseFloat(value);
       break;
     case "jethome/balcony/temperature":
       temperatureOutdoor = parseFloat(value);
+      if (Date.now() - lastOutdoorSaveTimestamp >= SAVE_INTERVAL_MS) {
+        saveClimateReading("outdoor", temperatureOutdoor, humidityOutdoor);
+        lastOutdoorSaveTimestamp = Date.now();
+        console.log("Saved outdoor climate data");
+      }
       break;
     case "jethome/balcony/humidity":
       humidityOutdoor = parseFloat(value);
