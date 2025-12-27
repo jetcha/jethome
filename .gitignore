@@ -23,3 +23,6 @@ dist/
 # PlatformIO
 .pio/
 compile_commands.json
+
+# Database
+climate_history.db
