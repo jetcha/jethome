@@ -57,9 +57,9 @@ db.exec(`
 `);
 
 // Save interval: every 5 minutes
-const SAVE_INTERVAL_MS = 300000;
-let lastIndoorSaveTimestamp = 0;
-let lastOutdoorSaveTimestamp = 0;
+const CLIMATE_DATA_SAVE_INTERVAL_MS = 300000;
+let lastIndoorClimateSaveTimestamp = 0;
+let lastOutdoorClimateSaveTimestamp = 0;
 
 function saveClimateReading(location, temperature, humidity) {
   if (temperature === null || humidity === null) return;
@@ -117,28 +117,38 @@ mqttClient.on("message", async (topic, message) => {
   const value = message.toString();
 
   switch (topic) {
-    case "jethome/frontdoor/temperature":
-      temperatureIndoor = parseFloat(value);
-      if (Date.now() - lastIndoorSaveTimestamp >= SAVE_INTERVAL_MS) {
-        saveClimateReading("indoor", temperatureIndoor, humidityIndoor);
-        lastIndoorSaveTimestamp = Date.now();
-        console.log("Saved indoor climate data");
+    case "jethome/frontdoor/climate":
+      try {
+        const data = JSON.parse(value);
+        temperatureIndoor = data.temperature;
+        humidityIndoor = data.humidity;
+        
+        if (Date.now() - lastIndoorClimateSaveTimestamp >= CLIMATE_DATA_SAVE_INTERVAL_MS) {
+          saveClimateReading("indoor", temperatureIndoor, humidityIndoor);
+          lastIndoorClimateSaveTimestamp = Date.now();
+          console.log("Saved indoor climate data");
+        }
+      } catch (e) {
+        console.error("Failed to parse indoor climate:", e);
       }
       break;
-    case "jethome/frontdoor/humidity":
-      humidityIndoor = parseFloat(value);
-      break;
-    case "jethome/balcony/temperature":
-      temperatureOutdoor = parseFloat(value);
-      if (Date.now() - lastOutdoorSaveTimestamp >= SAVE_INTERVAL_MS) {
-        saveClimateReading("outdoor", temperatureOutdoor, humidityOutdoor);
-        lastOutdoorSaveTimestamp = Date.now();
-        console.log("Saved outdoor climate data");
+
+    case "jethome/balcony/climate":
+      try {
+        const data = JSON.parse(value);
+        temperatureOutdoor = data.temperature;
+        humidityOutdoor = data.humidity;
+        
+        if (Date.now() - lastOutdoorClimateSaveTimestamp >= CLIMATE_DATA_SAVE_INTERVAL_MS) {
+          saveClimateReading("outdoor", temperatureOutdoor, humidityOutdoor);
+          lastOutdoorClimateSaveTimestamp = Date.now();
+          console.log("Saved outdoor climate data");
+        }
+      } catch (e) {
+        console.error("Failed to parse outdoor climate:", e);
       }
       break;
-    case "jethome/balcony/humidity":
-      humidityOutdoor = parseFloat(value);
-      break;
+
     case "jethome/door/state":
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";

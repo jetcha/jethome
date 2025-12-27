@@ -26,8 +26,7 @@
 #define MQTT_CLIENT_ID "jethome-balcony"
 
 // MQTT Topics - Publish
-#define MQTT_TOPIC_TEMPERATURE "jethome/balcony/temperature"
-#define MQTT_TOPIC_HUMIDITY "jethome/balcony/humidity"
+#define MQTT_TOPIC_CLIMATE "jethome/balcony/climate"
 
 // =============================================================================
 // Pin Definitions

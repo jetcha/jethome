@@ -11,7 +11,7 @@ void initClimateSensor() {
 }
 
 void updateClimateData() {
-    char payload[16];
+    char payload[64];
 
     if (millis() - lastUpdateTimestampMs < CLIMATE_DATA_READ_INTERVAL_MS) {
         return;
@@ -22,17 +22,9 @@ void updateClimateData() {
     float humidity = dht.readHumidity();
 
     if (isnan(temperature) || isnan(humidity)) {
-        Serial.printf("Ah\n");
         return;
     }
 
-    snprintf(payload, sizeof(payload), "%.1f", temperature);
-    publishMessageMQTT(MQTT_TOPIC_TEMPERATURE, payload);
-
-    Serial.printf("Temperature: %s\n", payload);
-
-    snprintf(payload, sizeof(payload), "%.1f", humidity);
-    publishMessageMQTT(MQTT_TOPIC_HUMIDITY, payload);
-
-    Serial.printf("Humdity: %s\n", payload);
+    snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"humidity\":%.1f}", temperature, humidity);
+    publishMessageMQTT(MQTT_TOPIC_CLIMATE, payload);
 }

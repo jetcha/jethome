@@ -11,6 +11,8 @@ void initClimateSensor() {
 }
 
 void updateClimateData() {
+    char payload[64];
+
     if (millis() - lastUpdateTimestampMs < CLIMATE_DATA_READ_INTERVAL_MS) {
         return;
     }
@@ -23,11 +25,6 @@ void updateClimateData() {
         return;
     }
 
-    char payload[16];
-
-    snprintf(payload, sizeof(payload), "%.1f", temperature);
-    publishMessageMQTT(MQTT_TOPIC_TEMPERATURE, payload);
-
-    snprintf(payload, sizeof(payload), "%.1f", humidity);
-    publishMessageMQTT(MQTT_TOPIC_HUMIDITY, payload);
+    snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"humidity\":%.1f}", temperature, humidity);
+    publishMessageMQTT(MQTT_TOPIC_CLIMATE, payload);
 }
