@@ -87,17 +87,25 @@ async function fetchSunTimes() {
   }
 }
 
-async function isDark() {
+function isDark() {
+  if (!sunriseTime || !sunsetTime) {
+    return false;
+  }
+
+  // Compare time-of-day only (ignore date portion)
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const sunriseMinutes = sunriseTime.getHours() * 60 + sunriseTime.getMinutes();
+  const sunsetMinutes = sunsetTime.getHours() * 60 + sunsetTime.getMinutes();
+
+  return nowMinutes < sunriseMinutes || nowMinutes > sunsetMinutes;
+}
+
+async function refreshSunTimesIfNeeded() {
   const today = new Date().toDateString();
   if (lastFetchDate !== today) {
     await fetchSunTimes();
   }
-
-  if (!sunriseTime || !sunsetTime) {
-    return false;
-  }
-  const now = new Date();
-  return now < sunriseTime || now > sunsetTime;
 }
 
 // Fetch on startup
@@ -159,7 +167,8 @@ mqttClient.on("message", async (topic, message) => {
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
 
-      const dark = await isDark();
+      await refreshSunTimesIfNeeded();
+      const dark = isDark();
       mqttClient.publish("jethome/light/dark", dark ? "1" : "0");
 
       if (!wasDoorOpened && isDoorOpened && alarmState) {
@@ -294,7 +303,8 @@ app.get("/api/windowState", requireAuth, (req, res) => {
   res.json({ opened: isWindowOpened });
 });
 
-app.get("/api/isDark", requireAuth, (req, res) => {
+app.get("/api/isDark", requireAuth, async (req, res) => {
+  await refreshSunTimesIfNeeded();
   res.json({
     dark: isDark(),
     sunrise: sunriseTime?.toISOString(),
