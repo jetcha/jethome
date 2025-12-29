@@ -319,10 +319,24 @@ app.get("/api/vapidPublicKey", (req, res) => {
 app.post("/api/push/subscribe", requireAuth, (req, res) => {
   const subscription = JSON.stringify(req.body);
   pushSubscriptions.add(subscription);
-  console.log("New push subscription");
   res.json({ success: true });
 });
 
 app.listen(PORT, () => {
   console.log(`Jet Home backend running on http://localhost:${PORT}`);
+});
+
+app.get("/api/climate/history", requireAuth, (req, res) => {
+  const { location = "indoor", hours = 24 } = req.query;
+
+  const stmt = db.prepare(`
+    SELECT temperature, humidity, timestamp
+    FROM climate_history
+    WHERE location = ?
+      AND timestamp > datetime('now', '-' || ? || ' hours')
+    ORDER BY timestamp ASC
+  `);
+
+  const rows = stmt.all(location, hours);
+  res.json(rows);
 });

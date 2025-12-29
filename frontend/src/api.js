@@ -121,3 +121,7 @@ export async function subscribeToPush(subscription) {
 export async function getSunTimes() {
   return api("/api/isDark");
 }
+
+export async function getClimateHistory(location = "indoor", hours = 24) {
+  return api(`/api/climate/history?location=${location}&hours=${hours}`);
+}

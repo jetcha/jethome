@@ -3,11 +3,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import App from "./App.vue";
 import Login from "./views/Login.vue";
 import Dashboard from "./views/Dashboard.vue";
+import History from "./views/History.vue";
+import "./styles/common.css";
 
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", component: Login },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/history", component: History, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

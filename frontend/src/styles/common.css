@@ -1,0 +1,56 @@
+/* Layout */
+.page-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-container {
+  max-width: 35rem;
+  width: 100%;
+  padding: 2.3rem;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #1c1c1c;
+}
+
+.page-title {
+  font-size: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+.header-btn {
+  background: transparent;
+  border: 1px solid #1c1c1c;
+  color: #1c1c1c;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.header-btn.active {
+  background: #1c1c1c;
+  color: #ffffff;
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

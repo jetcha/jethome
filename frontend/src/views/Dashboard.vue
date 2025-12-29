@@ -1,22 +1,23 @@
 <template>
-  <div class="dashboard-wrapper">
-    <div class="dashboard">
-      <header>
-        <h1>Home</h1>
+  <div class="page-wrapper">
+    <div class="page-container">
+      <header class="page-header">
+        <h1 class="page-title">Home</h1>
         <div class="header-actions">
           <button
             v-if="isAdmin"
-            class="test-mode-btn"
+            class="header-btn"
             :class="{ active: testModeEnabled }"
             @click="setTestModeState(!testModeEnabled)"
           >
             TEST
           </button>
-          <button class="logout-btn" @click="handleLogout">EXIT</button>
+          <button class="header-btn" @click="goToHistory">HISTORY</button>
+          <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>
 
-      <main>
+      <main class="content">
         <!-- Alarm Card -->
         <div class="card">
           <div class="card-header">
@@ -333,6 +334,10 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+function goToHistory() {
+  router.push("/history");
+}
+
 // Update onMounted
 onMounted(() => {
   isAdmin.value = getUserRole() === "admin";
@@ -367,70 +372,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dashboard-wrapper {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dashboard {
-  max-width: 35rem;
-  width: 100%;
-  padding: 2.3rem;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #1c1c1c;
-}
-
-h1 {
-  font-size: 1.5rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.test-mode-btn {
-  background: transparent;
-  border: 1px solid #1c1c1c;
-  color: #1c1c1c;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.test-mode-btn.active {
-  background: #1c1c1c;
-  color: #ffffff;
-}
-
-.logout-btn {
-  background: transparent;
-  border: 1px solid #1c1c1c;
-  color: #1c1c1c;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
 .card {
   display: flex;
   justify-content: space-between;
