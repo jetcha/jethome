@@ -156,7 +156,6 @@ mqttClient.on("message", async (topic, message) => {
         ) {
           saveClimateReading("outdoor", temperatureOutdoor, humidityOutdoor);
           lastOutdoorClimateSaveTimestamp = Date.now();
-          console.log("Saved outdoor climate data");
         }
       } catch (e) {
         console.error("Failed to parse outdoor climate:", e);
@@ -181,6 +180,15 @@ mqttClient.on("message", async (topic, message) => {
       isWindowOpened = value === "1";
       if (!wasWindowOpened && isWindowOpened && alarmState) {
         sendPushNotification("Jet Home", "⚠️ Window Opened ⚠️");
+      }
+      break;
+    }
+    case "jethome/motion/state": {
+      const motionDetected = value === "1";
+      if (motionDetected) {
+        console.log("Yes");
+      } else {
+        console.log("No");
       }
       break;
     }
