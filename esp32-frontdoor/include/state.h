@@ -2,6 +2,7 @@
 #define STATE_H
 
 #include <Arduino.h>
+
 #include "config.h"
 
 // =============================================================================
@@ -10,8 +11,7 @@
 // This struct holds all state that needs to be shared between modules.
 // A single instance is created in main.cpp and passed by reference to modules.
 
-struct State
-{
+struct State {
     // Alarm system
     bool isAlarmEnabled = false;
     bool isTestMode = false;
@@ -20,6 +20,10 @@ struct State
     bool isDoorOpen = false;
     bool isWindowOpen = false;
     bool wasDoorOpen = false;
+
+    // Motion sensor
+    bool isMotionDetected = false;
+    bool wasMotionDetected = false;
 
     // Siren
     bool isSirenActive = false;
@@ -34,4 +38,4 @@ struct State
     unsigned long lightStripCountdownStartTimestampMs = 0;
 };
 
-#endif // STATE_H
+#endif  // STATE_H

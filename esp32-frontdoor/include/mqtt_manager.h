@@ -2,10 +2,11 @@
 #define MQTT_MANAGER_H
 
 #include <PubSubClient.h>
+
 #include "state.h"
 
-void initMQTT(State *statePtr);
+void initMQTT(State* statePtr);
 void maintainMQTTConnection();
-void publishMessageMQTT(const char *topic, const char *payload);
+void publishMessageMQTT(const char* topic, const char* payload);
 
-#endif // MQTT_MANAGER_H
+#endif  // MQTT_MANAGER_H

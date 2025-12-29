@@ -4,4 +4,4 @@
 void initClimateSensor();
 void updateClimateData();
 
-#endif // CLIMATE_SENSOR_H
+#endif  // CLIMATE_SENSOR_H

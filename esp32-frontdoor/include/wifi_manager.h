@@ -6,4 +6,4 @@
 void initWifi();
 void maintainWifiConnection();
 
-#endif // WIFI_MANAGER_H
+#endif  // WIFI_MANAGER_H

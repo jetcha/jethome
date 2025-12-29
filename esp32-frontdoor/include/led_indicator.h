@@ -4,6 +4,6 @@
 #include "state.h"
 
 void initLedIndicator();
-void updateLedIndicator(const State &state);
+void updateLedIndicator(const State& state);
 
-#endif // LED_INDICATOR_H
+#endif  // LED_INDICATOR_H

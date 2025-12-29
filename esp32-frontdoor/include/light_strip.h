@@ -4,6 +4,6 @@
 #include "state.h"
 
 void initLightStrip();
-void updateLightStrip(State &state);
+void updateLightStrip(State& state);
 
-#endif // LIGHT_STRIP_H
+#endif  // LIGHT_STRIP_H

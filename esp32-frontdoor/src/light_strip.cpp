@@ -1,18 +1,20 @@
-#include <Arduino.h>
-#include "config.h"
 #include "light_strip.h"
 
-void initLightStrip()
-{
+#include <Arduino.h>
+
+#include "config.h"
+
+void initLightStrip() {
     pinMode(RELAY_LIGHT_STRIP_PIN, OUTPUT);
-    digitalWrite(RELAY_LIGHT_STRIP_PIN, HIGH); // Start OFF (relay is active LOW)
+    digitalWrite(RELAY_LIGHT_STRIP_PIN, HIGH);  // Start OFF (relay is active LOW)
 }
 
-void updateLightStrip(State &state)
-{
+void updateLightStrip(State& state) {
+    bool isDoorJustClosed = !state.isDoorOpen && state.wasDoorOpen;
+    bool isMotionJustStopped = !state.isMotionDetected && state.wasMotionDetected;
+
     // Light strip only works when alarm is OFF
-    if (state.isAlarmEnabled)
-    {
+    if (state.isAlarmEnabled) {
         state.isLightStripOn = false;
         state.isLightStripCountdownStarted = false;
         digitalWrite(RELAY_LIGHT_STRIP_PIN, HIGH);
@@ -20,32 +22,29 @@ void updateLightStrip(State &state)
     }
 
     // Not dark: Light strip always OFF
-    if (!state.isDark)
-    {
+    if (!state.isDark) {
         state.isLightStripOn = false;
         state.isLightStripCountdownStarted = false;
         digitalWrite(RELAY_LIGHT_STRIP_PIN, HIGH);
         return;
     }
 
-    // Dark + Door opens: Keep light strip ON, no countdown until door is closed
-    if (state.isDoorOpen)
-    {
+    // Door open OR Motion detected: Keep light strip ON
+    if (state.isDoorOpen || state.isMotionDetected) {
         state.isLightStripOn = true;
         state.isLightStripCountdownStarted = false;
     }
 
-    // Dark + Door just closed: Start countdown
-    if (!state.isDoorOpen && state.wasDoorOpen && state.isLightStripOn)
-    {
+    // Door just closed or No motion: Start countdown
+    if ((isDoorJustClosed || isMotionJustStopped) && !state.isDoorOpen && !state.isMotionDetected &&
+        state.isLightStripOn) {
         state.isLightStripCountdownStarted = true;
         state.lightStripCountdownStartTimestampMs = millis();
     }
 
-    // Check if countdown finished
+    // Otherwise check if countdown finished
     if (state.isLightStripCountdownStarted &&
-        (millis() - state.lightStripCountdownStartTimestampMs >= LIGHT_STRIP_DURATION_MS))
-    {
+        (millis() - state.lightStripCountdownStartTimestampMs >= LIGHT_STRIP_DURATION_MS)) {
         state.isLightStripOn = false;
         state.isLightStripCountdownStarted = false;
     }

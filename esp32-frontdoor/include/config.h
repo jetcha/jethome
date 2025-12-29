@@ -56,6 +56,9 @@
 #define RELAY_SIREN_PIN 32
 #define RELAY_LIGHT_STRIP_PIN 33
 
+// HC-SR501 Motion Sensor
+#define MOTION_SENSOR_PIN 27
+
 // =============================================================================
 // Timing Definitions
 // =============================================================================
@@ -68,4 +71,4 @@
 #define LIGHT_STRIP_DURATION_MS 15000
 #define LOOPING_DELAY_MS 100
 
-#endif // CONFIG_H
+#endif  // CONFIG_H

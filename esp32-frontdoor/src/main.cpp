@@ -1,26 +1,27 @@
 #include <Arduino.h>
+
+#include "alarm_system.h"
+#include "climate_sensor.h"
 #include "config.h"
-#include "state.h"
-#include "wifi_manager.h"
+#include "led_indicator.h"
+#include "light_strip.h"
+#include "magnet_sensor.h"
+#include "motion_sensor.h"
 #include "mqtt_manager.h"
 #include "ota_manager.h"
-#include "climate_sensor.h"
-#include "magnet_sensor.h"
-#include "alarm_system.h"
-#include "light_strip.h"
-#include "led_indicator.h"
+#include "state.h"
+#include "wifi_manager.h"
 
 // Global application state
-// A single instance shared info between modules
 static State appState;
 
-void setup()
-{
+void setup() {
     Serial.begin(SERIAL_BAUDRATE);
 
     // Initialize all modules
     initLedIndicator();
     initMagnetSensor();
+    initMotionSensor();
     initAlarmSystem();
     initLightStrip();
     initClimateSensor();
@@ -31,8 +32,7 @@ void setup()
     initMQTT(&appState);
 }
 
-void loop()
-{
+void loop() {
     // Handle OTA updates
     handleOTA();
 
@@ -42,6 +42,7 @@ void loop()
 
     // Update sensors
     updateMagnetSensorStatus(appState);
+    updateMotionSensor(appState);
     updateClimateData();
 
     // Update outputs
