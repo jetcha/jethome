@@ -109,6 +109,11 @@ function createChart() {
           bodyColor: "#ffffff",
         },
       },
+      onHover: (event, elements) => {
+        if (elements.length > 0 && navigator.vibrate) {
+          navigator.vibrate(1);
+        }
+      },
     },
   });
 }
