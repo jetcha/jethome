@@ -71,6 +71,12 @@ function saveClimateReading(location, temperature, humidity) {
 }
 
 async function fetchSunTimes() {
+  // Only fetch the data once in a day
+  const today = new Date().toDateString();
+  if (lastFetchDate === today) {
+    return;
+  }
+
   try {
     const res = await fetch(
       `https://api.sunrise-sunset.org/json?lat=${LATITUDE}&lng=${LONGITUDE}&formatted=0`
@@ -89,7 +95,8 @@ async function fetchSunTimes() {
 
 function isDark() {
   if (!sunriseTime || !sunsetTime) {
-    return false;
+    // Return true (Dark) as a safe default for security lights
+    return true;
   }
 
   // Compare time-of-day only (ignore date portion)
@@ -101,25 +108,26 @@ function isDark() {
   return nowMinutes < sunriseMinutes || nowMinutes > sunsetMinutes;
 }
 
-async function refreshSunTimesIfNeeded() {
-  const today = new Date().toDateString();
-  if (lastFetchDate !== today) {
-    await fetchSunTimes();
-  }
+async function syncDarknessState() {
+  await fetchSunTimes();
+  const dark = isDark();
+  mqttClient.publish("jethome/light/dark", dark ? "1" : "0", { retain: true });
 }
-
-// Fetch on startup
-fetchSunTimes();
 
 // MQTT connection
 const mqttClient = mqtt.connect("mqtt://localhost:1883");
 
-mqttClient.on("connect", () => {
+mqttClient.on("connect", async () => {
   console.log("Connected to MQTT broker");
   mqttClient.subscribe("jethome/#", (err) => {
     if (err) console.error("MQTT subscribe error:", err);
   });
+
+  await syncDarknessState();
 });
+
+// Sync darkness state every 15 minutes to be sure
+setInterval(syncDarknessState, 900000);
 
 mqttClient.on("message", async (topic, message) => {
   const value = message.toString();
@@ -137,7 +145,6 @@ mqttClient.on("message", async (topic, message) => {
         ) {
           saveClimateReading("indoor", temperatureIndoor, humidityIndoor);
           lastIndoorClimateSaveTimestamp = Date.now();
-          console.log("Saved indoor climate data");
         }
       } catch (e) {
         console.error("Failed to parse indoor climate:", e);
@@ -166,9 +173,7 @@ mqttClient.on("message", async (topic, message) => {
       const wasDoorOpened = isDoorOpened;
       isDoorOpened = value === "1";
 
-      await refreshSunTimesIfNeeded();
-      const dark = isDark();
-      mqttClient.publish("jethome/light/dark", dark ? "1" : "0");
+      await syncDarknessState();
 
       if (!wasDoorOpened && isDoorOpened && alarmState) {
         sendPushNotification("Jet Home", "⚠️ Front Door Opened ⚠️");
@@ -180,15 +185,6 @@ mqttClient.on("message", async (topic, message) => {
       isWindowOpened = value === "1";
       if (!wasWindowOpened && isWindowOpened && alarmState) {
         sendPushNotification("Jet Home", "⚠️ Window Opened ⚠️");
-      }
-      break;
-    }
-    case "jethome/motion/state": {
-      const motionDetected = value === "1";
-      if (motionDetected) {
-        console.log("Yes");
-      } else {
-        console.log("No");
       }
       break;
     }
@@ -261,7 +257,6 @@ app.get("/api/alarm", requireAuth, (req, res) => {
 app.post("/api/alarm", requireAuth, (req, res) => {
   const { enabled } = req.body;
   alarmState = Boolean(enabled);
-  console.log(`Alarm ${alarmState ? "ON" : "OFF"}`);
   mqttClient.publish("jethome/alarm/set", alarmState ? "1" : "0");
 
   sendPushNotification(
@@ -312,7 +307,7 @@ app.get("/api/windowState", requireAuth, (req, res) => {
 });
 
 app.get("/api/isDark", requireAuth, async (req, res) => {
-  await refreshSunTimesIfNeeded();
+  await fetchSunTimes();
   res.json({
     dark: isDark(),
     sunrise: sunriseTime?.toISOString(),
