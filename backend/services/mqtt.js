@@ -18,9 +18,6 @@ export function initMqtt() {
     mqttClient.subscribe("jethome/#", (err) => {
       if (err) console.error("MQTT subscribe error:", err);
     });
-
-    // Sync darkness state on connect
-    await syncDarknessState();
   });
 
   mqttClient.on("message", handleMqttMessage);

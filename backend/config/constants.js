@@ -17,7 +17,7 @@ export const LATITUDE = 51.4416;
 export const LONGITUDE = 5.4697;
 
 // Update intervals
-export const SUN_TIME_UPDATE_INTERVAL_MS = 300000;
+export const SUN_TIME_UPDATE_INTERVAL_MS = 60000;
 export const CLIMATE_DATA_SAVE_INTERVAL_MS = 300000;
 
 // MQTT

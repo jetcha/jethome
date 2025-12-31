@@ -22,7 +22,7 @@ app.use("/api", climateRoutes);
 // Initialize MQTT
 initMqtt();
 
-// Sync darkness state every 5 minutes
+// Sync darkness state every minute
 setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);
 
 // Start server

@@ -37,7 +37,7 @@ export function isDark() {
     stateManager.sunsetTime.getHours() * 60 +
     stateManager.sunsetTime.getMinutes();
 
-  return nowMinutes < sunriseMinutes || nowMinutes > sunsetMinutes;
+  return nowMinutes <= sunriseMinutes || nowMinutes >= sunsetMinutes;
 }
 
 export function getSunTimes() {
