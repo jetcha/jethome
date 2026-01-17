@@ -32,9 +32,9 @@
 // Pin Definitions
 // =============================================================================
 
-// DHT22 Temperature/Humidity Sensor
-#define DHTPIN 4
-#define DHTTYPE DHT22
+// SHTC3 Temperature/Humidity Sensor
+#define I2C_SDA_PIN 21
+#define I2C_SCL_PIN 22
 
 // =============================================================================
 // Timing Definitions
@@ -44,4 +44,4 @@
 #define CLIMATE_DATA_READ_INTERVAL_MS 2000
 #define LOOPING_DELAY_MS 100
 
-#endif // CONFIG_H
+#endif  // CONFIG_H

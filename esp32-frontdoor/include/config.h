@@ -39,14 +39,14 @@
 // Pin Definitions
 // =============================================================================
 
-// DHT22 Temperature/Humidity Sensor
-#define DHTPIN 4
-#define DHTTYPE DHT22
+// SHTC3 Temperature/Humidity Sensor
+#define I2C_SDA_PIN 21
+#define I2C_SCL_PIN 22
 
 // KY016 RGB LED
 #define LED_R_PIN 18
 #define LED_G_PIN 19
-#define LED_B_PIN 21
+#define LED_B_PIN 23
 
 // Magnetic Reed Sensors
 #define DOOR_SENSOR_PIN 25
