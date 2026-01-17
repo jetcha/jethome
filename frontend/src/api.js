@@ -122,6 +122,6 @@ export async function getSunTimes() {
   return api("/api/isDark");
 }
 
-export async function getClimateHistory(location = "indoor", hours = 24) {
+export async function getClimateHistory(location = "indoor", hours = 168) {
   return api(`/api/climate/history?location=${location}&hours=${hours}`);
 }

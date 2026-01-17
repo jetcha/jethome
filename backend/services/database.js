@@ -35,3 +35,18 @@ export function getClimateHistory(location, hours) {
   `);
   return stmt.all(location, hours);
 }
+
+export function getClimateHistoryAggregated(location, hours) {
+  const stmt = db.prepare(`
+    SELECT 
+      ROUND(AVG(temperature), 1) as temperature,
+      ROUND(AVG(humidity), 1) as humidity,
+      strftime('%Y-%m-%d %H:00:00', timestamp) as timestamp
+    FROM climate_history
+    WHERE location = ?
+      AND timestamp > datetime('now', '-' || ? || ' hours')
+    GROUP BY strftime('%Y-%m-%d %H', timestamp)
+    ORDER BY timestamp ASC
+  `);
+  return stmt.all(location, hours);
+}

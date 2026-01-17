@@ -52,8 +52,8 @@ const historyData = ref([]);
 
 async function fetchHistory() {
   try {
-    indoorHistory.value = await getClimateHistory("indoor", 24);
-    outdoorHistory.value = await getClimateHistory("outdoor", 24);
+    indoorHistory.value = await getClimateHistory("indoor", 168);
+    outdoorHistory.value = await getClimateHistory("outdoor", 168);
     updateHistoryData();
   } catch (e) {
     console.error("Failed to fetch climate history:", e);

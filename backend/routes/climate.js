@@ -1,7 +1,10 @@
 import express from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { stateManager } from "../services/StateManager.js";
-import { getClimateHistory } from "../services/database.js";
+import {
+  getClimateHistory,
+  getClimateHistoryAggregated,
+} from "../services/database.js";
 import { fetchSunTimes, isDark, getSunTimes } from "../services/sunTimes.js";
 import { VAPID_PUBLIC } from "../config/constants.js";
 import { addSubscription } from "../services/push.js";
@@ -19,6 +22,12 @@ router.get("/balcony/climate", requireAuth, (req, res) => {
 router.get("/climate/history", requireAuth, (req, res) => {
   const { location = "indoor", hours = 24 } = req.query;
   const rows = getClimateHistory(location, hours);
+  res.json(rows);
+});
+
+router.get("/climate/history", requireAuth, (req, res) => {
+  const { location = "indoor", hours = 168 } = req.query;
+  const rows = getClimateHistoryAggregated(location, hours);
   res.json(rows);
 });
 

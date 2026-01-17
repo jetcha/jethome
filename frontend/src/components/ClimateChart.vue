@@ -73,12 +73,13 @@ function createChart() {
         x: {
           type: "time",
           time: {
+            unit: "day",
             displayFormats: {
-              hour: "HH:mm",
+              day: "EEE d",
             },
           },
           ticks: {
-            maxTicksLimit: 6,
+            maxTicksLimit: 7,
             color: "#1c1c1c",
           },
           grid: {
