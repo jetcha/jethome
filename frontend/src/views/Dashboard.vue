@@ -4,13 +4,8 @@
       <header class="page-header">
         <h1 class="page-title">Home</h1>
         <div class="header-actions">
-          <button
-            v-if="isAdmin"
-            class="header-btn"
-            :class="{ active: testModeEnabled }"
-            @click="setTestModeState(!testModeEnabled)"
-          >
-            TEST
+          <button v-if="isAdmin" class="header-btn" @click="goToCamera">
+            CAMERA
           </button>
           <button class="header-btn" @click="goToHistory">HISTORY</button>
           <button class="header-btn" @click="handleLogout">EXIT</button>
@@ -157,8 +152,6 @@ import {
   getClimateOutdoor,
   getDoorState,
   getWindowState,
-  getTestMode,
-  setTestMode,
   getVapidPublicKey,
   subscribeToPush,
   getSunTimes,
@@ -174,8 +167,6 @@ const temperatureOutdoor = ref(null);
 const humidityOutdoor = ref(null);
 const isDoorOpened = ref(false);
 const isWindowOpened = ref(false);
-const testModeEnabled = ref(false);
-const testModeLoading = ref(false);
 const sunrise = ref(null);
 const sunset = ref(null);
 
@@ -239,29 +230,6 @@ async function fetchWindowState() {
     isWindowOpened.value = data.opened;
   } catch (e) {
     console.error("Failed to fetch window state:", e);
-  }
-}
-
-async function fetchTestMode() {
-  try {
-    const data = await getTestMode();
-    testModeEnabled.value = data.enabled;
-  } catch (e) {
-    console.error("Failed to fetch test mode:", e);
-  }
-}
-
-async function setTestModeState(enabled) {
-  if (testModeEnabled.value === enabled || testModeLoading.value) return;
-
-  testModeLoading.value = true;
-  try {
-    const data = await setTestMode(enabled);
-    testModeEnabled.value = data.enabled;
-  } catch (e) {
-    console.error("Failed to set test mode:", e);
-  } finally {
-    testModeLoading.value = false;
   }
 }
 
@@ -338,6 +306,10 @@ function goToHistory() {
   router.push("/history");
 }
 
+function goToCamera() {
+  router.push("/camera");
+}
+
 // Update onMounted
 onMounted(() => {
   isAdmin.value = getUserRole() === "admin";
@@ -350,19 +322,12 @@ onMounted(() => {
   fetchWindowState();
   fetchSunTimes();
 
-  if (isAdmin.value) {
-    fetchTestMode();
-  }
-
   tempInterval = setInterval(() => {
     fetchClimateIndoor();
     fetchClimateOutdoor();
     fetchDoorState();
     fetchWindowState();
     fetchAlarm();
-    if (isAdmin.value) {
-      fetchTestMode();
-    }
   }, 1000);
 });
 

@@ -12,7 +12,11 @@ const routes = [
   { path: "/login", component: Login },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
   { path: "/history", component: History, meta: { requiresAuth: true } },
-  { path: "/camera", component: Camera, meta: { requiresAuth: true } },
+  {
+    path: "/camera",
+    component: Camera,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
 ];
 
 const router = createRouter({
@@ -23,8 +27,11 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("jet-home-token");
+  const role = localStorage.getItem("jet-home-role");
   if (to.meta.requiresAuth && !token) {
     next("/login");
+  } else if (to.meta.requiresAdmin && role !== "admin") {
+    next("/dashboard");
   } else if (to.path === "/login" && token) {
     next("/dashboard");
   } else {

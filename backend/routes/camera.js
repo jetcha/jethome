@@ -16,6 +16,11 @@ router.get("/cam/video", (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  const role = stateManager.getTokenRole(token);
+  if (role !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   const camReq = http.get(`http://${CAM_HOST}:${CAM_PORT}/video`, (camRes) => {
     res.writeHead(camRes.statusCode, {
       "Content-Type":
