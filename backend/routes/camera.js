@@ -1,13 +1,21 @@
 import express from "express";
 import http from "http";
-import { requireAuth } from "../middleware/auth.js";
+import { stateManager } from "../services/StateManager.js";
 
 const router = express.Router();
 
 const CAM_HOST = "192.168.1.87";
 const CAM_PORT = 8080;
 
-router.get("/cam/video", requireAuth, (req, res) => {
+router.get("/cam/video", (req, res) => {
+  // Accept token from query param (for <img> tag) or header
+  const token =
+    req.headers.authorization?.replace("Bearer ", "") || req.query.token;
+
+  if (!token || !stateManager.hasToken(token)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const camReq = http.get(`http://${CAM_HOST}:${CAM_PORT}/video`, (camRes) => {
     res.writeHead(camRes.statusCode, {
       "Content-Type":
