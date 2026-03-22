@@ -47,10 +47,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .camera-feed {
-  border-radius: 0.5rem;
   overflow: hidden;
-  border: 1px solid #1c1c1c;
-  max-width: 22rem;
   margin: 0 auto;
 }
 
