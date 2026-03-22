@@ -27,7 +27,6 @@
 
 // MQTT Topics - Subscribe
 #define MQTT_TOPIC_ALARM_SET "jethome/alarm/set"
-#define MQTT_TOPIC_TESTMODE_SET "jethome/testmode/set"
 #define MQTT_TOPIC_LIGHT_DARK "jethome/light/dark"
 
 // MQTT Topics - Publish
@@ -63,7 +62,6 @@
 // Timing Definitions
 // =============================================================================
 #define SIREN_DURATION_MS 60000
-#define SIREN_DURATION_TEST_MS 300
 #define WIFI_RECONNECTION_DELAY_MS 10000
 #define MQTT_RECONNECTION_DELAY_MS 5000
 #define CLIMATE_DATA_READ_INTERVAL_MS 2000

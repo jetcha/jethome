@@ -25,12 +25,6 @@ static void mqttCallback(char* topic, byte* payload, unsigned int length) {
         appState->isAlarmEnabled = (msg == "1");
     }
 
-    if (topicStr == MQTT_TOPIC_TESTMODE_SET) {
-        appState->isTestMode = (msg == "1");
-        appState->sirenDurationMs =
-            appState->isTestMode ? SIREN_DURATION_TEST_MS : SIREN_DURATION_MS;
-    }
-
     if (topicStr == MQTT_TOPIC_LIGHT_DARK) {
         appState->isDark = (msg == "1");
     }
@@ -57,7 +51,6 @@ void maintainMQTTConnection() {
     // The main loop should retry if it fails
     if (mqtt.connect(MQTT_CLIENT_ID)) {
         mqtt.subscribe(MQTT_TOPIC_ALARM_SET);
-        mqtt.subscribe(MQTT_TOPIC_TESTMODE_SET);
         mqtt.subscribe(MQTT_TOPIC_LIGHT_DARK);
     }
 

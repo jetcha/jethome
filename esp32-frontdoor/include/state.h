@@ -14,7 +14,6 @@
 struct State {
     // Alarm system
     bool isAlarmEnabled = false;
-    bool isTestMode = false;
 
     // Door and window sensors
     bool isDoorOpen = false;
@@ -29,7 +28,6 @@ struct State {
     bool isSirenActive = false;
     bool isSirenCountdownStarted = false;
     unsigned long sirenStartTimestampMs = 0;
-    unsigned long sirenDurationMs = SIREN_DURATION_MS;
 
     // Light strip
     bool isDark = false;

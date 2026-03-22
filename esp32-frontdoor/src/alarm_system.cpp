@@ -32,7 +32,7 @@ void updateAlarmSystem(State& state) {
 
     // Check if countdown finished
     if (state.isSirenActive && state.isSirenCountdownStarted &&
-        (millis() - state.sirenStartTimestampMs >= state.sirenDurationMs)) {
+        (millis() - state.sirenStartTimestampMs >= SIREN_DURATION_MS)) {
         state.isSirenActive = false;
         state.isSirenCountdownStarted = false;
     }

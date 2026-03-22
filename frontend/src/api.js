@@ -94,17 +94,6 @@ export async function getWindowState() {
   return api("/api/windowState");
 }
 
-export async function getTestMode() {
-  return api("/api/testmode");
-}
-
-export async function setTestMode(enabled) {
-  return api("/api/testmode", {
-    method: "POST",
-    body: JSON.stringify({ enabled }),
-  });
-}
-
 export async function getVapidPublicKey() {
   const res = await fetch(`${API_BASE}/api/vapidPublicKey`);
   const data = await res.json();

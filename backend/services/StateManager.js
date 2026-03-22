@@ -6,7 +6,6 @@ class StateManager {
   #state = {
     // Alarm system
     alarmState: false,
-    testMode: false,
 
     // Sensors
     isDoorOpened: false,
@@ -45,14 +44,6 @@ class StateManager {
     if (oldValue !== this.#state.alarmState) {
       this.#emit("alarmStateChange", this.#state.alarmState);
     }
-  }
-
-  get testMode() {
-    return this.#state.testMode;
-  }
-
-  set testMode(value) {
-    this.#state.testMode = Boolean(value);
   }
 
   // ============= Sensor States =============
@@ -248,7 +239,6 @@ class StateManager {
     // For testing purposes
     this.#state = {
       alarmState: false,
-      testMode: false,
       isDoorOpened: false,
       isWindowOpened: false,
       temperatureIndoor: null,

@@ -29,9 +29,6 @@ void updateLedIndicator(const State& state) {
     if (!state.isAlarmEnabled) {
         // Green: Alarm disabled (safe mode)
         currentLedState = {false, true, false};
-    } else if (state.isTestMode) {
-        // Blue: Test mode active
-        currentLedState = {false, false, true};
     } else if (millis() - lastBlinkMs >= LED_BLINK_INTERVAL_MS) {
         // Red blinking: Alarm enabled (armed)
         currentLedState = {!previousLedState.r, false, false};
