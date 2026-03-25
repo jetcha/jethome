@@ -4,12 +4,13 @@
       <header class="page-header">
         <h1 class="page-title">Home</h1>
         <div class="header-actions">
+          <button class="header-btn refresh-btn" @click="refreshPage">
+            <img src="/refresh.svg" alt="Refresh" class="refresh-icon" />
+          </button>
           <button v-if="isAdmin" class="header-btn" @click="goToCamera">
             CAM
           </button>
           <button class="header-btn" @click="goToHistory">LOG</button>
-          <!-- TODO: Decide whether to turn on refresh function later -->
-          <!-- <button class="header-btn" @click="refreshPage">SYNC</button> -->
           <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>
@@ -360,6 +361,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.refresh-icon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+}
+
 .card {
   display: flex;
   justify-content: space-between;
