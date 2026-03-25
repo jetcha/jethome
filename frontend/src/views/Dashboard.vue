@@ -4,11 +4,11 @@
       <header class="page-header">
         <h1 class="page-title">Home</h1>
         <div class="header-actions">
-          <button class="header-btn" @click="refreshPage">↻</button>
           <button v-if="isAdmin" class="header-btn" @click="goToCamera">
             CAM
           </button>
           <button class="header-btn" @click="goToHistory">LOG</button>
+          <button class="header-btn" @click="refreshPage">SYNC</button>
           <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>
