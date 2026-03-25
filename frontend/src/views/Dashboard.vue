@@ -4,10 +4,11 @@
       <header class="page-header">
         <h1 class="page-title">Home</h1>
         <div class="header-actions">
+          <button class="header-btn" @click="refreshPage">↻</button>
           <button v-if="isAdmin" class="header-btn" @click="goToCamera">
-            CAMERA
+            CAM
           </button>
-          <button class="header-btn" @click="goToHistory">HISTORY</button>
+          <button class="header-btn" @click="goToHistory">LOG</button>
           <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>
@@ -302,12 +303,28 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-function goToHistory() {
-  router.push("/history");
+function refreshPage() {
+  window.location.reload();
 }
 
 function goToCamera() {
   router.push("/camera");
+}
+
+function goToHistory() {
+  router.push("/history");
+}
+
+function handleVisibilityChange() {
+  // Refresh data when coming back to the view
+  if (document.visibilityState === "visible") {
+    fetchAlarm();
+    fetchClimateIndoor();
+    fetchClimateOutdoor();
+    fetchDoorState();
+    fetchWindowState();
+    fetchSunTimes();
+  }
 }
 
 // Update onMounted
@@ -329,10 +346,15 @@ onMounted(() => {
     fetchWindowState();
     fetchAlarm();
   }, 1000);
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
 onUnmounted(() => {
-  if (tempInterval) clearInterval(tempInterval);
+  if (tempInterval) {
+    clearInterval(tempInterval);
+  }
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
 </script>
 
