@@ -8,7 +8,8 @@
             CAM
           </button>
           <button class="header-btn" @click="goToHistory">LOG</button>
-          <button class="header-btn" @click="refreshPage">SYNC</button>
+          <!-- TODO: Decide whether to turn on refresh function later -->
+          <!-- <button class="header-btn" @click="refreshPage">SYNC</button> -->
           <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>
