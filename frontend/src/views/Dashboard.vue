@@ -10,7 +10,7 @@
           <button v-if="isAdmin" class="header-btn" @click="goToCamera">
             CAM
           </button>
-          <button class="header-btn" @click="goToHistory">LOG</button>
+          <button class="header-btn" @click="goToHistory">HIST</button>
           <button class="header-btn" @click="handleLogout">EXIT</button>
         </div>
       </header>

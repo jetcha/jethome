@@ -5,6 +5,7 @@ import Login from "./views/Login.vue";
 import Dashboard from "./views/Dashboard.vue";
 import History from "./views/History.vue";
 import Camera from "./views/Camera.vue";
+import Recordings from "./views/Recordings.vue";
 import "./styles/common.css";
 
 const routes = [
@@ -15,6 +16,11 @@ const routes = [
   {
     path: "/camera",
     component: Camera,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: "/recordings",
+    component: Recordings,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
 ];
