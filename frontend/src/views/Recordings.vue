@@ -2,9 +2,17 @@
   <div class="page-wrapper">
     <div class="page-container">
       <div class="page-header">
-        <h1 class="page-title">{{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : 'Recordings' }}</h1>
+        <h1 class="page-title">
+          {{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : 'Recordings' }}
+        </h1>
         <div class="header-actions">
-          <button v-if="!selectedSegment" class="header-btn" @click="handleClear">CLEAR</button>
+          <button
+            v-if="!selectedSegment"
+            class="header-btn"
+            @click="handleClear"
+          >
+            CLEAR
+          </button>
           <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
@@ -21,28 +29,42 @@
         </div>
 
         <!-- Recordings List -->
-        <div v-if="loading" class="recordings-empty">Loading...</div>
-        <div v-else-if="Object.keys(groupedSegments).length === 0" class="recordings-empty">
-          No recordings available
-        </div>
-        <div v-else>
-          <div v-for="(hours, date) in groupedSegments" :key="date" class="date-group">
-            <div class="date-header">{{ date }}</div>
-            <div v-for="(segs, hour) in hours" :key="hour" class="hour-group">
-              <div class="hour-header">{{ hour }}</div>
-              <div
-                v-for="seg in segs"
-                :key="seg.filename"
-                class="segment-row"
-                :class="{ active: selectedSegment?.filename === seg.filename }"
-                @click="selectSegment(seg)"
-              >
-                <span class="segment-time">{{ formatTime(seg.timestamp) }}</span>
-                <span class="segment-size">{{ formatSize(seg.size) }}</span>
-              </div>
-            </div>
+        <template v-else>
+          <div v-if="loading" class="recordings-empty">Loading...</div>
+          <div v-else-if="segments.length === 0" class="recordings-empty">
+            No recordings available
           </div>
-        </div>
+          <template v-else>
+            <div
+              v-for="seg in pagedSegments"
+              :key="seg.filename"
+              class="segment-row"
+              @click="selectSegment(seg)"
+            >
+              <span class="segment-time">
+                {{ formatRow(seg.timestamp) }}
+              </span>
+              <span class="segment-size">{{ formatSize(seg.size) }}</span>
+            </div>
+            <div v-if="totalPages > 1" class="pagination">
+              <button
+                class="header-btn"
+                :disabled="page === 0"
+                @click="page--"
+              >
+                PREV
+              </button>
+              <span class="page-info">{{ page + 1 }} / {{ totalPages }}</span>
+              <button
+                class="header-btn"
+                :disabled="page >= totalPages - 1"
+                @click="page++"
+              >
+                NEXT
+              </button>
+            </div>
+          </template>
+        </template>
       </div>
     </div>
   </div>
@@ -53,16 +75,34 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getRecordings, getRecordingUrl, clearRecordings } from "../api.js";
 
+const PAGE_SIZE = 10;
+
 const router = useRouter();
 const segments = ref([]);
 const selectedSegment = ref(null);
 const loading = ref(true);
+const page = ref(0);
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(segments.value.length / PAGE_SIZE))
+);
+
+const pagedSegments = computed(() => {
+  const start = page.value * PAGE_SIZE;
+  return segments.value.slice(start, start + PAGE_SIZE);
+});
+
+const videoSrc = computed(() => {
+  if (!selectedSegment.value) return null;
+  return getRecordingUrl(selectedSegment.value.filename);
+});
 
 async function handleClear() {
   try {
     await clearRecordings();
     selectedSegment.value = null;
     segments.value = [];
+    page.value = 0;
   } catch (e) {
     console.error("Failed to clear recordings:", e);
   }
@@ -75,29 +115,6 @@ function handleBack() {
     router.push("/camera");
   }
 }
-
-const videoSrc = computed(() => {
-  if (!selectedSegment.value) return null;
-  return getRecordingUrl(selectedSegment.value.filename);
-});
-
-const groupedSegments = computed(() => {
-  const groups = {};
-  for (const seg of segments.value) {
-    const dt = new Date(seg.timestamp);
-    const date = dt.toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
-    const hour = `${String(dt.getHours()).padStart(2, "0")}:00`;
-
-    if (!groups[date]) groups[date] = {};
-    if (!groups[date][hour]) groups[date][hour] = [];
-    groups[date][hour].push(seg);
-  }
-  return groups;
-});
 
 function selectSegment(seg) {
   selectedSegment.value = seg;
@@ -123,8 +140,10 @@ function formatTimestamp(ts) {
   });
 }
 
-function formatTime(ts) {
-  return new Date(ts).toLocaleTimeString("en-GB", {
+function formatRow(ts) {
+  return new Date(ts).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -158,18 +177,6 @@ onMounted(() => {
   margin-bottom: 1.5rem;
 }
 
-.player-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.player-title {
-  font-weight: bold;
-  font-size: 1rem;
-}
-
 .video-player {
   width: 100%;
   display: block;
@@ -181,23 +188,6 @@ onMounted(() => {
   color: #999;
   text-align: center;
   padding: 2rem 0;
-}
-
-.date-group {
-  margin-bottom: 1rem;
-}
-
-.date-header {
-  font-weight: bold;
-  font-size: 0.95rem;
-  padding: 0.4rem 0;
-  margin-bottom: 0.25rem;
-}
-
-.hour-header {
-  font-size: 0.85rem;
-  color: #666;
-  padding: 0.3rem 0 0.15rem;
 }
 
 .segment-row {
@@ -214,11 +204,6 @@ onMounted(() => {
   background: #f0f0f0;
 }
 
-.segment-row.active {
-  background: #1c1c1c;
-  color: white;
-}
-
 .segment-time {
   font-size: 0.95rem;
 }
@@ -228,7 +213,16 @@ onMounted(() => {
   color: #999;
 }
 
-.segment-row.active .segment-size {
-  color: #ccc;
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #666;
 }
 </style>

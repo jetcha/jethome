@@ -42,7 +42,7 @@ export function startRecording() {
     "-c:v", "libx264",
     "-preset", "ultrafast",
     "-crf", "28",
-    "-r", "24",
+    "-r", "16",
     "-an",
     "-f", "segment",
     "-segment_time", String(SEGMENT_DURATION_SECONDS),

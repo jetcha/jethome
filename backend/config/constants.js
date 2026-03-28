@@ -31,6 +31,6 @@ export const CAMERA_HOST = "192.168.1.87";
 export const CAMERA_PORT = 8080;
 export const CAMERA_STREAM_URL = `http://${CAMERA_HOST}:${CAMERA_PORT}/video`;
 export const RECORDINGS_DIR = "/var/jethome/recordings";
-export const SEGMENT_DURATION_SECONDS = 600; // 10 minutes
+export const SEGMENT_DURATION_SECONDS = 1200; // 20 minutes
 export const RETENTION_HOURS = 48;
 export const RETENTION_CLEANUP_INTERVAL_MS = 3600000; // 1 hour
