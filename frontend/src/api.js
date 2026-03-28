@@ -86,14 +86,6 @@ export async function getClimateOutdoor() {
   return api("/api/balcony/climate");
 }
 
-export async function getDoorState() {
-  return api("/api/doorState");
-}
-
-export async function getWindowState() {
-  return api("/api/windowState");
-}
-
 export async function getVapidPublicKey() {
   const res = await fetch(`${API_BASE}/api/vapidPublicKey`);
   const data = await res.json();

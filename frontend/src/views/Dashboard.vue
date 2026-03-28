@@ -95,30 +95,6 @@
           </div>
         </div>
 
-        <!-- Door Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Door Status</span>
-          </div>
-          <div class="card-content">
-            <div class="humidity">
-              {{ isDoorOpened ? "OPEN" : "CLOSED" }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Window Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Window Status</span>
-          </div>
-          <div class="card-content">
-            <div class="humidity">
-              {{ isWindowOpened ? "OPEN" : "CLOSED" }}
-            </div>
-          </div>
-        </div>
-
         <!-- Sunrise Card -->
         <div class="card">
           <div class="card-header">
@@ -153,8 +129,6 @@ import {
   setAlarm,
   getClimateIndoor,
   getClimateOutdoor,
-  getDoorState,
-  getWindowState,
   getVapidPublicKey,
   subscribeToPush,
   getSunTimes,
@@ -168,8 +142,6 @@ const temperatureIndoor = ref(null);
 const humidityIndoor = ref(null);
 const temperatureOutdoor = ref(null);
 const humidityOutdoor = ref(null);
-const isDoorOpened = ref(false);
-const isWindowOpened = ref(false);
 const sunrise = ref(null);
 const sunset = ref(null);
 
@@ -215,24 +187,6 @@ async function fetchClimateOutdoor() {
     humidityOutdoor.value = data.humidity;
   } catch (e) {
     console.error("Failed to fetch outdoor climate:", e);
-  }
-}
-
-async function fetchDoorState() {
-  try {
-    const data = await getDoorState();
-    isDoorOpened.value = data.opened;
-  } catch (e) {
-    console.error("Failed to fetch door state:", e);
-  }
-}
-
-async function fetchWindowState() {
-  try {
-    const data = await getWindowState();
-    isWindowOpened.value = data.opened;
-  } catch (e) {
-    console.error("Failed to fetch window state:", e);
   }
 }
 
@@ -323,8 +277,6 @@ function handleVisibilityChange() {
     fetchAlarm();
     fetchClimateIndoor();
     fetchClimateOutdoor();
-    fetchDoorState();
-    fetchWindowState();
     fetchSunTimes();
   }
 }
@@ -337,15 +289,11 @@ onMounted(() => {
   fetchAlarm();
   fetchClimateIndoor();
   fetchClimateOutdoor();
-  fetchDoorState();
-  fetchWindowState();
   fetchSunTimes();
 
   tempInterval = setInterval(() => {
     fetchClimateIndoor();
     fetchClimateOutdoor();
-    fetchDoorState();
-    fetchWindowState();
     fetchAlarm();
   }, 1000);
 
