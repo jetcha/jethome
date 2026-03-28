@@ -114,3 +114,12 @@ export async function getSunTimes() {
 export async function getClimateHistory(location = "indoor", hours = 168) {
   return api(`/api/climate/history?location=${location}&hours=${hours}`);
 }
+
+export async function getRecordings() {
+  return api("/api/cam/recordings");
+}
+
+export function getRecordingUrl(filename) {
+  const token = getToken();
+  return `${API_BASE}/api/cam/recordings/${filename}?token=${token}`;
+}

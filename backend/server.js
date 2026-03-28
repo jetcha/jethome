@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { PORT, SUN_TIME_UPDATE_INTERVAL_MS } from "./config/constants.js";
 import { initMqtt, syncDarknessState } from "./services/mqtt.js";
+import { startRecording, stopRecording } from "./services/recorder.js";
 import authRoutes from "./routes/auth.js";
 import alarmRoutes from "./routes/alarm.js";
 import sensorsRoutes from "./routes/sensors.js";
@@ -26,6 +27,17 @@ initMqtt();
 
 // Sync darkness state every minute
 setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);
+
+// Start continuous camera recording
+startRecording();
+
+// Graceful shutdown
+function shutdown() {
+  stopRecording();
+  process.exit();
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 // Start server
 app.listen(PORT, () => {
