@@ -12,6 +12,7 @@ import {
 let ffmpegProcess = null;
 let cleanupInterval = null;
 let restartTimeout = null;
+let recording = false;
 
 const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
 
@@ -19,9 +20,15 @@ function getRecordingsPath() {
   return path.resolve(RECORDINGS_DIR);
 }
 
+export function isRecording() {
+  return recording;
+}
+
 export function startRecording() {
   const dir = getRecordingsPath();
   fs.mkdirSync(dir, { recursive: true });
+
+  recording = true;
 
   if (ffmpegProcess) {
     console.log("[Recorder] Already recording");
@@ -57,11 +64,13 @@ export function startRecording() {
     console.log(`[Recorder] FFmpeg exited with code ${code}`);
     ffmpegProcess = null;
 
-    // Auto-restart after delay
-    restartTimeout = setTimeout(() => {
-      console.log("[Recorder] Restarting FFmpeg...");
-      startRecording();
-    }, 5000);
+    // Only auto-restart if recording is still enabled
+    if (recording) {
+      restartTimeout = setTimeout(() => {
+        console.log("[Recorder] Restarting FFmpeg...");
+        startRecording();
+      }, 5000);
+    }
   });
 
   console.log("[Recorder] Started recording");
@@ -74,6 +83,8 @@ export function startRecording() {
 }
 
 export function stopRecording() {
+  recording = false;
+
   if (restartTimeout) {
     clearTimeout(restartTimeout);
     restartTimeout = null;

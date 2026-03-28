@@ -43,6 +43,33 @@
           </div>
         </div>
 
+        <!-- Camera Record Card -->
+        <div v-if="isAdmin" class="card">
+          <div class="card-header">
+            <span>Camera Record</span>
+          </div>
+          <div class="card-content">
+            <div class="toggle-switch">
+              <div
+                class="toggle-slider"
+                :class="{ active: recordingEnabled }"
+              ></div>
+              <span
+                class="toggle-option"
+                :class="{ selected: recordingEnabled }"
+                @click="setRecordingState(true)"
+                >ON</span
+              >
+              <span
+                class="toggle-option"
+                :class="{ selected: !recordingEnabled }"
+                @click="setRecordingState(false)"
+                >OFF</span
+              >
+            </div>
+          </div>
+        </div>
+
         <!-- Temperature Indoor Card -->
         <div class="card">
           <div class="card-header">
@@ -132,12 +159,16 @@ import {
   getVapidPublicKey,
   subscribeToPush,
   getSunTimes,
+  getRecording,
+  setRecording,
 } from "../api.js";
 const router = useRouter();
 
 const isAdmin = ref(false);
 const alarmEnabled = ref(false);
 const alarmLoading = ref(false);
+const recordingEnabled = ref(false);
+const recordingLoading = ref(false);
 const temperatureIndoor = ref(null);
 const humidityIndoor = ref(null);
 const temperatureOutdoor = ref(null);
@@ -157,7 +188,7 @@ async function fetchAlarm() {
 }
 
 async function setAlarmState(enabled) {
-  if (alarmEnabled.value === enabled || alarmLoading.value) return; // already in that state, do nothing
+  if (alarmEnabled.value === enabled || alarmLoading.value) return;
 
   alarmLoading.value = true;
   try {
@@ -167,6 +198,29 @@ async function setAlarmState(enabled) {
     console.error("Failed to set alarm:", e);
   } finally {
     alarmLoading.value = false;
+  }
+}
+
+async function fetchRecording() {
+  try {
+    const data = await getRecording();
+    recordingEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to fetch recording state:", e);
+  }
+}
+
+async function setRecordingState(enabled) {
+  if (recordingEnabled.value === enabled || recordingLoading.value) return;
+
+  recordingLoading.value = true;
+  try {
+    const data = await setRecording(enabled);
+    recordingEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to set recording:", e);
+  } finally {
+    recordingLoading.value = false;
   }
 }
 
@@ -275,6 +329,7 @@ function handleVisibilityChange() {
   // Refresh data when coming back to the view
   if (document.visibilityState === "visible") {
     fetchAlarm();
+    fetchRecording();
     fetchClimateIndoor();
     fetchClimateOutdoor();
     fetchSunTimes();
@@ -287,6 +342,7 @@ onMounted(() => {
 
   setupPushNotifications();
   fetchAlarm();
+  fetchRecording();
   fetchClimateIndoor();
   fetchClimateOutdoor();
   fetchSunTimes();

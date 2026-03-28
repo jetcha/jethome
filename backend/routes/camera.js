@@ -2,7 +2,12 @@ import express from "express";
 import http from "http";
 import path from "path";
 import { stateManager } from "../services/StateManager.js";
-import { getSegments } from "../services/recorder.js";
+import {
+  getSegments,
+  isRecording,
+  startRecording,
+  stopRecording,
+} from "../services/recorder.js";
 import {
   CAMERA_HOST,
   CAMERA_PORT,
@@ -58,6 +63,25 @@ router.get("/cam/video", (req, res) => {
   req.on("close", () => {
     camReq.destroy();
   });
+});
+
+// Get recording state
+router.get("/cam/recording", (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  res.json({ enabled: isRecording() });
+});
+
+// Set recording state
+router.post("/cam/recording", (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+
+  const { enabled } = req.body;
+  if (enabled) {
+    startRecording();
+  } else {
+    stopRecording();
+  }
+  res.json({ enabled: isRecording() });
 });
 
 // List recordings

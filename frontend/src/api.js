@@ -107,6 +107,17 @@ export async function getClimateHistory(location = "indoor", hours = 168) {
   return api(`/api/climate/history?location=${location}&hours=${hours}`);
 }
 
+export async function getRecording() {
+  return api("/api/cam/recording");
+}
+
+export async function setRecording(enabled) {
+  return api("/api/cam/recording", {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+}
+
 export async function getRecordings() {
   return api("/api/cam/recordings");
 }
