@@ -2,19 +2,15 @@
   <div class="page-wrapper">
     <div class="page-container">
       <div class="page-header">
-        <h1 class="page-title">Recordings</h1>
+        <h1 class="page-title">{{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : 'Recordings' }}</h1>
         <div class="header-actions">
-          <button class="header-btn" @click="handleClear">CLEAR</button>
-          <button class="header-btn" @click="goBack">BACK</button>
+          <button v-if="!selectedSegment" class="header-btn" @click="handleClear">CLEAR</button>
+          <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
       <div class="content">
         <!-- Video Player -->
         <div v-if="selectedSegment" class="player-section">
-          <div class="player-header">
-            <span class="player-title">{{ formatTimestamp(selectedSegment.timestamp) }}</span>
-            <button class="header-btn" @click="closePlayer">CLOSE</button>
-          </div>
           <video
             :src="videoSrc"
             class="video-player"
@@ -72,8 +68,12 @@ async function handleClear() {
   }
 }
 
-function goBack() {
-  router.push("/camera");
+function handleBack() {
+  if (selectedSegment.value) {
+    selectedSegment.value = null;
+  } else {
+    router.push("/camera");
+  }
 }
 
 const videoSrc = computed(() => {
@@ -101,10 +101,6 @@ const groupedSegments = computed(() => {
 
 function selectSegment(seg) {
   selectedSegment.value = seg;
-}
-
-function closePlayer() {
-  selectedSegment.value = null;
 }
 
 function playNext() {
@@ -195,7 +191,6 @@ onMounted(() => {
   font-weight: bold;
   font-size: 0.95rem;
   padding: 0.4rem 0;
-  border-bottom: 1px solid #1c1c1c;
   margin-bottom: 0.25rem;
 }
 
