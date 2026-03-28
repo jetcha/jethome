@@ -128,6 +128,17 @@ export function getSegments() {
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
+export function clearAllSegments() {
+  const dir = getRecordingsPath();
+  if (!fs.existsSync(dir)) return;
+
+  const files = fs.readdirSync(dir).filter((f) => FILENAME_PATTERN.test(f));
+  for (const filename of files) {
+    fs.unlinkSync(path.join(dir, filename));
+  }
+  console.log(`[Recorder] Cleared ${files.length} segments`);
+}
+
 function parseTimestamp(filename) {
   // rec_2026-03-28_14-20-00.mp4 -> 2026-03-28T14:20:00
   const match = filename.match(

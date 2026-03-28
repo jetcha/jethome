@@ -4,6 +4,7 @@
       <div class="page-header">
         <h1 class="page-title">Recordings</h1>
         <div class="header-actions">
+          <button class="header-btn" @click="handleClear">CLEAR</button>
           <button class="header-btn" @click="goBack">BACK</button>
         </div>
       </div>
@@ -54,12 +55,22 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getRecordings, getRecordingUrl } from "../api.js";
+import { getRecordings, getRecordingUrl, clearRecordings } from "../api.js";
 
 const router = useRouter();
 const segments = ref([]);
 const selectedSegment = ref(null);
 const loading = ref(true);
+
+async function handleClear() {
+  try {
+    await clearRecordings();
+    selectedSegment.value = null;
+    segments.value = [];
+  } catch (e) {
+    console.error("Failed to clear recordings:", e);
+  }
+}
 
 function goBack() {
   router.push("/camera");

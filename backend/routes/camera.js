@@ -4,6 +4,7 @@ import path from "path";
 import { stateManager } from "../services/StateManager.js";
 import {
   getSegments,
+  clearAllSegments,
   isRecording,
   startRecording,
   stopRecording,
@@ -82,6 +83,13 @@ router.post("/cam/recording", (req, res) => {
     stopRecording();
   }
   res.json({ enabled: isRecording() });
+});
+
+// Clear all recordings
+router.delete("/cam/recordings", (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  clearAllSegments();
+  res.json({ success: true });
 });
 
 // List recordings
