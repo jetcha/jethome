@@ -70,75 +70,47 @@
           </div>
         </div>
 
-        <!-- Temperature Indoor Card -->
+        <!-- Indoor Climate Card -->
         <div class="card">
           <div class="card-header">
-            <span>Indoor Temperature</span>
+            <span>Indoor Climate</span>
           </div>
           <div class="card-content">
-            <div class="temperature">
+            <div class="climate-value">
               {{
                 temperatureIndoor !== null ? `${temperatureIndoor}°C` : "..."
               }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Humidity Indoor Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Indoor Humidity</span>
-          </div>
-          <div class="card-content">
-            <div class="humidity">
+              /
               {{ humidityIndoor !== null ? `${humidityIndoor}%` : "..." }}
             </div>
           </div>
         </div>
 
-        <!-- Temperature Outdoor Card -->
+        <!-- Outdoor Climate Card -->
         <div class="card">
           <div class="card-header">
-            <span>Outdoor Temperature</span>
+            <span>Outdoor Climate</span>
           </div>
           <div class="card-content">
-            <div class="temperature">
+            <div class="climate-value">
               {{
                 temperatureOutdoor !== null ? `${temperatureOutdoor}°C` : "..."
               }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Humidity Outdoor Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Outdoor Humidity</span>
-          </div>
-          <div class="card-content">
-            <div class="humidity">
+              /
               {{ humidityOutdoor !== null ? `${humidityOutdoor}%` : "..." }}
             </div>
           </div>
         </div>
 
-        <!-- Sunrise Card -->
+        <!-- Sun Times Card -->
         <div class="card">
           <div class="card-header">
-            <span>Sunrise</span>
+            <span>Sunrise / Sunset</span>
           </div>
           <div class="card-content">
-            <div class="sun-time">{{ sunrise ?? "..." }}</div>
-          </div>
-        </div>
-
-        <!-- Sunset Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Sunset</span>
-          </div>
-          <div class="card-content">
-            <div class="sun-time">{{ sunset ?? "..." }}</div>
+            <div class="sun-time">
+              {{ sunrise ?? "..." }} / {{ sunset ?? "..." }}
+            </div>
           </div>
         </div>
       </main>
@@ -422,8 +394,7 @@ onUnmounted(() => {
   color: #ffffff;
 }
 
-.temperature,
-.humidity,
+.climate-value,
 .sun-time {
   font-size: 1rem;
   font-weight: bold;
