@@ -118,10 +118,6 @@ export async function setRecording(enabled) {
   });
 }
 
-export async function clearRecordings() {
-  return api("/api/cam/recordings", { method: "DELETE" });
-}
-
 export async function getRecordings() {
   return api("/api/cam/recordings");
 }

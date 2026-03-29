@@ -6,13 +6,6 @@
           {{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : 'Recordings' }}
         </h1>
         <div class="header-actions">
-          <button
-            v-if="!selectedSegment"
-            class="header-btn"
-            @click="handleClear"
-          >
-            CLEAR
-          </button>
           <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
@@ -73,7 +66,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getRecordings, getRecordingUrl, clearRecordings } from "../api.js";
+import { getRecordings, getRecordingUrl } from "../api.js";
 
 const PAGE_SIZE = 10;
 
@@ -96,17 +89,6 @@ const videoSrc = computed(() => {
   if (!selectedSegment.value) return null;
   return getRecordingUrl(selectedSegment.value.filename);
 });
-
-async function handleClear() {
-  try {
-    await clearRecordings();
-    selectedSegment.value = null;
-    segments.value = [];
-    page.value = 0;
-  } catch (e) {
-    console.error("Failed to clear recordings:", e);
-  }
-}
 
 function handleBack() {
   if (selectedSegment.value) {
