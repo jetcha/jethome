@@ -39,6 +39,13 @@
               </span>
               <span class="segment-size">{{ formatSize(seg.size) }}</span>
             </div>
+            <div
+              v-for="n in PAGE_SIZE - pagedSegments.length"
+              :key="'placeholder-' + n"
+              class="segment-row placeholder"
+            >
+              &nbsp;
+            </div>
             <div v-if="totalPages > 1" class="pagination">
               <button
                 class="header-btn"
@@ -182,8 +189,12 @@ onMounted(() => {
   transition: background 0.15s;
 }
 
-.segment-row:hover {
+.segment-row:not(.placeholder):hover {
   background: #f0f0f0;
+}
+
+.segment-row.placeholder {
+  cursor: default;
 }
 
 .segment-time {
