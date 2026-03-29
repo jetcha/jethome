@@ -2,20 +2,13 @@ import express from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { stateManager } from "../services/StateManager.js";
 import { publishMqtt } from "../services/mqtt.js";
-import { sendPushNotification } from "../services/push.js";
 
 const router = express.Router();
 
 // Apply alarm state to the physical device via MQTT.
-// Only sends a push notification when the state actually changes
-// to avoid spamming on every 30s evaluation cycle.
-function applyAlarmState(enabled, message) {
-  const changed = stateManager.alarmState !== enabled;
+function applyAlarmState(enabled) {
   stateManager.alarmState = enabled;
   publishMqtt("jethome/alarm/set", enabled ? "1" : "0");
-  if (changed && message) {
-    sendPushNotification("Jet Home", message);
-  }
 }
 
 // Check if the alarm should be on or off based on current time vs schedule.
@@ -32,10 +25,7 @@ function evaluateSchedule() {
   const currentTime = new Date().toTimeString().slice(0, 5);
   const shouldBeOn = currentTime >= onTime && currentTime < offTime;
 
-  applyAlarmState(
-    shouldBeOn,
-    shouldBeOn ? "Alarm turned ON (schedule)" : "Alarm turned OFF (schedule)"
-  );
+  applyAlarmState(shouldBeOn);
 }
 
 // Periodically evaluate schedule to auto-arm/disarm at the right times
@@ -67,10 +57,10 @@ router.post("/alarm", requireAuth, (req, res) => {
 
   if (mode === "on") {
     stateManager.alarmMode = "on";
-    applyAlarmState(true, "Alarm system turned ON");
+    applyAlarmState(true);
   } else if (mode === "off") {
     stateManager.alarmMode = "off";
-    applyAlarmState(false, "Alarm system turned OFF");
+    applyAlarmState(false);
   } else {
     stateManager.alarmMode = "schedule";
 
@@ -88,12 +78,11 @@ router.post("/alarm", requireAuth, (req, res) => {
 
       stateManager.alarmScheduleOn = scheduleOn;
       stateManager.alarmScheduleOff = scheduleOff;
-      evaluateSchedule();
-      sendPushNotification(
-        "Jet Home",
-        `Alarm scheduled: ON ${scheduleOn}, OFF ${scheduleOff}`
-      );
     }
+
+    // Always evaluate when entering schedule mode — saved times may already apply.
+    // Safe when times are null: evaluateSchedule() exits early if times aren't set.
+    evaluateSchedule();
   }
 
   res.json({
