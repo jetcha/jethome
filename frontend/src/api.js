@@ -71,10 +71,10 @@ export async function getAlarm() {
   return api("/api/alarm");
 }
 
-export async function setAlarm(enabled) {
+export async function setAlarm(mode, scheduleOn, scheduleOff) {
   return api("/api/alarm", {
     method: "POST",
-    body: JSON.stringify({ enabled }),
+    body: JSON.stringify({ mode, scheduleOn, scheduleOff }),
   });
 }
 

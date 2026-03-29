@@ -16,30 +16,78 @@
       </header>
 
       <main class="content">
-        <!-- Alarm Card -->
+        <!-- Alarm System Card -->
         <div class="card">
           <div class="card-header">
             <span>Alarm System</span>
           </div>
           <div class="card-content">
-            <div class="toggle-switch">
+            <div class="toggle-switch triple">
               <div
                 class="toggle-slider"
-                :class="{ active: alarmEnabled }"
+                :style="{ transform: `translateX(${alarmSliderPosition}%)` }"
               ></div>
               <span
                 class="toggle-option"
-                :class="{ selected: alarmEnabled }"
-                @click="setAlarmState(true)"
+                :class="{ selected: alarmMode === 'on' }"
+                @click="setAlarmModeValue('on')"
                 >ON</span
               >
               <span
                 class="toggle-option"
-                :class="{ selected: !alarmEnabled }"
-                @click="setAlarmState(false)"
+                :class="{ selected: alarmMode === 'schedule' }"
+                @click="setAlarmModeValue('schedule')"
+                >SCH</span
+              >
+              <span
+                class="toggle-option"
+                :class="{ selected: alarmMode === 'off' }"
+                @click="setAlarmModeValue('off')"
                 >OFF</span
               >
             </div>
+          </div>
+        </div>
+
+        <!-- Schedule On Card -->
+        <div class="card" :class="{ disabled: alarmMode !== 'schedule' }">
+          <div class="card-header">
+            <span>Schedule On</span>
+          </div>
+          <div class="card-content">
+            <input
+              type="time"
+              v-model="alarmScheduleOn"
+              :disabled="alarmMode !== 'schedule'"
+              @change="setScheduleTimes"
+            />
+          </div>
+        </div>
+
+        <!-- Schedule Off Card -->
+        <div class="card" :class="{ disabled: alarmMode !== 'schedule' }">
+          <div class="card-header">
+            <span>Schedule Off</span>
+          </div>
+          <div class="card-content">
+            <input
+              type="time"
+              v-model="alarmScheduleOff"
+              :disabled="alarmMode !== 'schedule'"
+              @change="setScheduleTimes"
+            />
+          </div>
+        </div>
+
+        <!-- Alarm Status Card -->
+        <div class="card">
+          <div class="card-header">
+            <span>Alarm Status</span>
+          </div>
+          <div class="card-content">
+            <span class="alarm-status" :class="{ armed: alarmStatus }">
+              {{ alarmStatus ? "ARMED" : "DISARMED" }}
+            </span>
           </div>
         </div>
 
@@ -119,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   getUserRole,
@@ -137,8 +185,17 @@ import {
 const router = useRouter();
 
 const isAdmin = ref(false);
-const alarmEnabled = ref(false);
+const alarmMode = ref("off");
+const alarmScheduleOn = ref("");
+const alarmScheduleOff = ref("");
+const alarmStatus = ref(false);
 const alarmLoading = ref(false);
+
+const alarmSliderPosition = computed(() => {
+  if (alarmMode.value === "on") return 0;
+  if (alarmMode.value === "schedule") return 100;
+  return 200;
+});
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
 const temperatureIndoor = ref(null);
@@ -153,21 +210,46 @@ let tempInterval = null;
 async function fetchAlarm() {
   try {
     const data = await getAlarm();
-    alarmEnabled.value = data.enabled;
+    alarmMode.value = data.mode;
+    alarmScheduleOn.value = data.scheduleOn || "";
+    alarmScheduleOff.value = data.scheduleOff || "";
+    alarmStatus.value = data.status;
   } catch (e) {
     console.error("Failed to fetch alarm state:", e);
   }
 }
 
-async function setAlarmState(enabled) {
-  if (alarmEnabled.value === enabled || alarmLoading.value) return;
-
+async function setAlarmModeValue(mode) {
+  if (alarmMode.value === mode || alarmLoading.value) return;
   alarmLoading.value = true;
   try {
-    const data = await setAlarm(enabled);
-    alarmEnabled.value = data.enabled;
+    const data = await setAlarm(mode);
+    alarmMode.value = data.mode;
+    alarmStatus.value = data.status;
   } catch (e) {
-    console.error("Failed to set alarm:", e);
+    console.error("Failed to set alarm mode:", e);
+  } finally {
+    alarmLoading.value = false;
+  }
+}
+
+async function setScheduleTimes() {
+  if (!alarmScheduleOn.value || !alarmScheduleOff.value) return;
+  if (alarmScheduleOn.value >= alarmScheduleOff.value) return;
+  if (alarmLoading.value) return;
+  alarmLoading.value = true;
+  try {
+    const data = await setAlarm(
+      "schedule",
+      alarmScheduleOn.value,
+      alarmScheduleOff.value
+    );
+    alarmMode.value = data.mode;
+    alarmScheduleOn.value = data.scheduleOn || "";
+    alarmScheduleOff.value = data.scheduleOff || "";
+    alarmStatus.value = data.status;
+  } catch (e) {
+    console.error("Failed to set schedule:", e);
   } finally {
     alarmLoading.value = false;
   }
@@ -372,6 +454,14 @@ onUnmounted(() => {
   transition: transform 0.2s ease;
 }
 
+.toggle-switch.triple {
+  width: 9rem;
+}
+
+.toggle-switch.triple .toggle-slider {
+  width: 33.33%;
+}
+
 .toggle-slider.active {
   transform: translateX(0);
 }
@@ -392,6 +482,31 @@ onUnmounted(() => {
 
 .toggle-option.selected {
   color: #ffffff;
+}
+
+.card.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+input[type="time"] {
+  background: transparent;
+  border: 1px solid #1c1c1c;
+  border-radius: 1rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  color: #1c1c1c;
+  font-family: inherit;
+}
+
+.alarm-status {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1c1c1c;
+}
+
+.alarm-status.armed {
+  color: #cc0000;
 }
 
 .climate-value,

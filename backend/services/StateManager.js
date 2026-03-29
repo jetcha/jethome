@@ -6,6 +6,9 @@ class StateManager {
   #state = {
     // Alarm system
     alarmState: false,
+    alarmMode: "off", // "on" | "schedule" | "off"
+    alarmScheduleOn: null, // "HH:MM" string
+    alarmScheduleOff: null, // "HH:MM" string
 
     // Sensors
     isDoorOpened: false,
@@ -44,6 +47,36 @@ class StateManager {
     if (oldValue !== this.#state.alarmState) {
       this.#emit("alarmStateChange", this.#state.alarmState);
     }
+  }
+
+  get alarmMode() {
+    return this.#state.alarmMode;
+  }
+
+  set alarmMode(value) {
+    const valid = ["on", "schedule", "off"];
+    if (!valid.includes(value)) return;
+    const old = this.#state.alarmMode;
+    this.#state.alarmMode = value;
+    if (old !== value) {
+      this.#emit("alarmModeChange", value);
+    }
+  }
+
+  get alarmScheduleOn() {
+    return this.#state.alarmScheduleOn;
+  }
+
+  set alarmScheduleOn(value) {
+    this.#state.alarmScheduleOn = value;
+  }
+
+  get alarmScheduleOff() {
+    return this.#state.alarmScheduleOff;
+  }
+
+  set alarmScheduleOff(value) {
+    this.#state.alarmScheduleOff = value;
   }
 
   // ============= Sensor States =============
@@ -239,6 +272,9 @@ class StateManager {
     // For testing purposes
     this.#state = {
       alarmState: false,
+      alarmMode: "off",
+      alarmScheduleOn: null,
+      alarmScheduleOff: null,
       isDoorOpened: false,
       isWindowOpened: false,
       temperatureIndoor: null,
