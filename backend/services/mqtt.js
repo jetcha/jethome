@@ -10,6 +10,11 @@ import { fetchSunTimes, isDark } from "./sunTimes.js";
 
 let mqttClient = null;
 
+// Max allowed humidity change (%) between consecutive saves to filter sensor spikes
+const MAX_HUMIDITY_DELTA_INDOOR = 5;
+const MAX_HUMIDITY_DELTA_OUTDOOR = 15;
+const lastSavedHumidity = { indoor: null, outdoor: null };
+
 export function initMqtt() {
   mqttClient = mqtt.connect(MQTT_BROKER_URL);
 
@@ -45,8 +50,17 @@ async function handleMqttMessage(topic, message) {
           Date.now() - stateManager.lastIndoorClimateSaveTimestamp >=
           CLIMATE_DATA_SAVE_INTERVAL_MS
         ) {
-          saveClimateReading("indoor", data.temperature, data.humidity);
-          stateManager.updateIndoorClimateSaveTimestamp();
+          // Skip saving if humidity jumped too far from last reading (sensor spike)
+          const isSpike =
+            lastSavedHumidity.indoor !== null &&
+            Math.abs(data.humidity - lastSavedHumidity.indoor) >
+              MAX_HUMIDITY_DELTA_INDOOR;
+
+          if (!isSpike) {
+            saveClimateReading("indoor", data.temperature, data.humidity);
+            lastSavedHumidity.indoor = data.humidity;
+            stateManager.updateIndoorClimateSaveTimestamp();
+          }
         }
       } catch (e) {
         console.error("Failed to parse indoor climate:", e);
@@ -65,8 +79,17 @@ async function handleMqttMessage(topic, message) {
           Date.now() - stateManager.lastOutdoorClimateSaveTimestamp >=
           CLIMATE_DATA_SAVE_INTERVAL_MS
         ) {
-          saveClimateReading("outdoor", data.temperature, data.humidity);
-          stateManager.updateOutdoorClimateSaveTimestamp();
+          // Skip saving if humidity jumped too far from last reading (sensor spike)
+          const isSpike =
+            lastSavedHumidity.outdoor !== null &&
+            Math.abs(data.humidity - lastSavedHumidity.outdoor) >
+              MAX_HUMIDITY_DELTA_OUTDOOR;
+
+          if (!isSpike) {
+            saveClimateReading("outdoor", data.temperature, data.humidity);
+            lastSavedHumidity.outdoor = data.humidity;
+            stateManager.updateOutdoorClimateSaveTimestamp();
+          }
         }
       } catch (e) {
         console.error("Failed to parse outdoor climate:", e);
