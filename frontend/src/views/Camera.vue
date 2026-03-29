@@ -4,7 +4,7 @@
       <div class="page-header">
         <h1 class="page-title">Camera</h1>
         <div class="header-actions">
-          <button class="header-btn" @click="goToRecordings">RECORDS</button>
+          <button class="header-btn" @click="goToRecordings">REC</button>
           <button class="header-btn" @click="goBack">BACK</button>
         </div>
       </div>

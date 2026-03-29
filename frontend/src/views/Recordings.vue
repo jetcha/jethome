@@ -68,7 +68,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getRecordings, getRecordingUrl } from "../api.js";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 const router = useRouter();
 const segments = ref([]);

@@ -43,7 +43,7 @@ export function startRecording() {
     "-preset", "ultrafast",
     "-crf", "28",
     "-r", "16",
-    "-an",
+    "-c:a", "aac",
     "-f", "segment",
     "-segment_time", String(SEGMENT_DURATION_SECONDS),
     "-segment_format", "mp4",
