@@ -85,8 +85,8 @@
             <span>Alarm Status</span>
           </div>
           <div class="card-content">
-            <span class="alarm-status" :class="{ armed: alarmStatus }">
-              {{ alarmStatus ? "ARMED" : "DISARMED" }}
+            <span class="alarm-status">
+              {{ alarmStatus ? "ON" : "OFF" }}
             </span>
           </div>
         </div>
@@ -503,10 +503,6 @@ input[type="time"] {
   font-size: 1rem;
   font-weight: bold;
   color: #1c1c1c;
-}
-
-.alarm-status.armed {
-  color: #cc0000;
 }
 
 .climate-value,

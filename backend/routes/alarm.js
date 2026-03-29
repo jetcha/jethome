@@ -6,6 +6,9 @@ import { sendPushNotification } from "../services/push.js";
 
 const router = express.Router();
 
+// Apply alarm state to the physical device via MQTT.
+// Only sends a push notification when the state actually changes
+// to avoid spamming on every 30s evaluation cycle.
 function applyAlarmState(enabled, message) {
   const changed = stateManager.alarmState !== enabled;
   stateManager.alarmState = enabled;
@@ -15,6 +18,10 @@ function applyAlarmState(enabled, message) {
   }
 }
 
+// Check if the alarm should be on or off based on current time vs schedule.
+// Only runs when mode is "schedule" and both times are set.
+// Schedule times are "HH:MM" strings (24h) — onTime must be before offTime
+// (no midnight crossover), so simple string comparison works.
 function evaluateSchedule() {
   if (stateManager.alarmMode !== "schedule") return;
 
@@ -31,7 +38,7 @@ function evaluateSchedule() {
   );
 }
 
-// Evaluate schedule every 30 seconds
+// Periodically evaluate schedule to auto-arm/disarm at the right times
 setInterval(evaluateSchedule, 30000);
 
 router.get("/alarm", requireAuth, (req, res) => {
@@ -43,6 +50,14 @@ router.get("/alarm", requireAuth, (req, res) => {
   });
 });
 
+// Set alarm mode and schedule.
+// - mode "on"/"off": arm/disarm immediately
+// - mode "schedule": switch to schedule mode. If times are provided,
+//   validate and store them, then evaluate immediately so the alarm
+//   reflects the correct state right away (e.g. if off-time is already
+//   past, the alarm disarms instantly instead of waiting for next cycle).
+//   If no times provided (user just clicked SCH toggle), only the mode
+//   changes — schedule times remain null until the user picks them.
 router.post("/alarm", requireAuth, (req, res) => {
   const { mode, scheduleOn, scheduleOff } = req.body;
 
@@ -57,24 +72,28 @@ router.post("/alarm", requireAuth, (req, res) => {
     stateManager.alarmMode = "off";
     applyAlarmState(false, "Alarm system turned OFF");
   } else {
-    const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-    if (!timeRegex.test(scheduleOn) || !timeRegex.test(scheduleOff)) {
-      return res.status(400).json({ error: "Invalid time format" });
-    }
-    if (scheduleOn >= scheduleOff) {
-      return res
-        .status(400)
-        .json({ error: "Schedule ON must be before OFF" });
-    }
-
     stateManager.alarmMode = "schedule";
-    stateManager.alarmScheduleOn = scheduleOn;
-    stateManager.alarmScheduleOff = scheduleOff;
-    evaluateSchedule();
-    sendPushNotification(
-      "Jet Home",
-      `Alarm scheduled: ON ${scheduleOn}, OFF ${scheduleOff}`
-    );
+
+    // Only validate and apply times when both are provided
+    if (scheduleOn && scheduleOff) {
+      const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+      if (!timeRegex.test(scheduleOn) || !timeRegex.test(scheduleOff)) {
+        return res.status(400).json({ error: "Invalid time format" });
+      }
+      if (scheduleOn >= scheduleOff) {
+        return res
+          .status(400)
+          .json({ error: "Schedule ON must be before OFF" });
+      }
+
+      stateManager.alarmScheduleOn = scheduleOn;
+      stateManager.alarmScheduleOff = scheduleOff;
+      evaluateSchedule();
+      sendPushNotification(
+        "Jet Home",
+        `Alarm scheduled: ON ${scheduleOn}, OFF ${scheduleOff}`
+      );
+    }
   }
 
   res.json({
