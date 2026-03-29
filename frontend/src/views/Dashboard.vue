@@ -450,7 +450,8 @@ onUnmounted(() => {
 
 .toggle-slider {
   position: absolute;
-  width: 50%;
+  width: 51%;
+  left: -0.5%;
   height: 100%;
   background: #1c1c1c;
   border-radius: 1rem;
@@ -462,7 +463,8 @@ onUnmounted(() => {
 }
 
 .toggle-switch.triple .toggle-slider {
-  width: 33.33%;
+  width: 33.83%;
+  left: -0.8%;
 }
 
 .toggle-slider.active {
