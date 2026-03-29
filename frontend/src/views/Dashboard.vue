@@ -230,7 +230,7 @@ async function setAlarmModeValue(mode) {
 async function onScheduleTimeChange() {
   // Wait until both times are picked before sending to backend
   if (!alarmScheduleOn.value || !alarmScheduleOff.value) return;
-  if (alarmScheduleOn.value >= alarmScheduleOff.value) return;
+  if (alarmScheduleOn.value === alarmScheduleOff.value) return;
   if (alarmLoading.value) return;
   alarmLoading.value = true;
   try {

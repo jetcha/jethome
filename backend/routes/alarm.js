@@ -13,8 +13,9 @@ function applyAlarmState(enabled) {
 
 // Check if the alarm should be on or off based on current time vs schedule.
 // Only runs when mode is "schedule" and both times are set.
-// Schedule times are "HH:MM" strings (24h) — onTime must be before offTime
-// (no midnight crossover), so simple string comparison works.
+// Schedule times are "HH:MM" strings (24h), string comparison works.
+// Supports midnight crossover: e.g. ON 22:00, OFF 07:00 means
+// the alarm is ON from 22:00 to midnight and from midnight to 07:00.
 function evaluateSchedule() {
   if (stateManager.alarmMode !== "schedule") return;
 
@@ -23,7 +24,15 @@ function evaluateSchedule() {
   if (!onTime || !offTime) return;
 
   const currentTime = new Date().toTimeString().slice(0, 5);
-  const shouldBeOn = currentTime >= onTime && currentTime < offTime;
+
+  let shouldBeOn;
+  if (onTime < offTime) {
+    // Same-day: e.g. ON 08:00, OFF 22:00
+    shouldBeOn = currentTime >= onTime && currentTime < offTime;
+  } else {
+    // Midnight crossover: e.g. ON 22:00, OFF 07:00
+    shouldBeOn = currentTime >= onTime || currentTime < offTime;
+  }
 
   applyAlarmState(shouldBeOn);
 }
@@ -70,10 +79,10 @@ router.post("/alarm", requireAuth, (req, res) => {
       if (!timeRegex.test(scheduleOn) || !timeRegex.test(scheduleOff)) {
         return res.status(400).json({ error: "Invalid time format" });
       }
-      if (scheduleOn >= scheduleOff) {
+      if (scheduleOn === scheduleOff) {
         return res
           .status(400)
-          .json({ error: "Schedule ON must be before OFF" });
+          .json({ error: "Schedule ON and OFF cannot be the same time" });
       }
 
       stateManager.alarmScheduleOn = scheduleOn;
