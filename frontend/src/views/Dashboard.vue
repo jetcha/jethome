@@ -55,11 +55,10 @@
             <span>Schedule On</span>
           </div>
           <div class="card-content">
-            <input
-              type="time"
-              v-model="alarmScheduleOn"
+            <TimePicker
+              :modelValue="alarmScheduleOn"
               :disabled="alarmMode !== 'schedule'"
-              @change="onScheduleTimeChange"
+              @update:modelValue="alarmScheduleOn = $event; onScheduleTimeChange()"
             />
           </div>
         </div>
@@ -70,11 +69,10 @@
             <span>Schedule Off</span>
           </div>
           <div class="card-content">
-            <input
-              type="time"
-              v-model="alarmScheduleOff"
+            <TimePicker
+              :modelValue="alarmScheduleOff"
               :disabled="alarmMode !== 'schedule'"
-              @change="onScheduleTimeChange"
+              @update:modelValue="alarmScheduleOff = $event; onScheduleTimeChange()"
             />
           </div>
         </div>
@@ -169,6 +167,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import TimePicker from "../components/TimePicker.vue";
 import {
   getUserRole,
   logout,
@@ -196,6 +195,8 @@ const alarmSliderPosition = computed(() => {
   if (alarmMode.value === "schedule") return 100;
   return 200;
 });
+
+
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
 const temperatureIndoor = ref(null);
@@ -489,16 +490,6 @@ onUnmounted(() => {
 .card.disabled {
   opacity: 0.4;
   pointer-events: none;
-}
-
-input[type="time"] {
-  background: transparent;
-  border: 1px solid #1c1c1c;
-  border-radius: 1rem;
-  padding: 0.4rem 0.7rem;
-  font-size: 0.9rem;
-  color: #1c1c1c;
-  font-family: inherit;
 }
 
 .alarm-status {
