@@ -59,7 +59,7 @@
               type="time"
               v-model="alarmScheduleOn"
               :disabled="alarmMode !== 'schedule'"
-              @change="setScheduleTimes"
+              @change="onScheduleTimeChange"
             />
           </div>
         </div>
@@ -74,7 +74,7 @@
               type="time"
               v-model="alarmScheduleOff"
               :disabled="alarmMode !== 'schedule'"
-              @change="setScheduleTimes"
+              @change="onScheduleTimeChange"
             />
           </div>
         </div>
@@ -211,9 +211,10 @@ async function fetchAlarm() {
   try {
     const data = await getAlarm();
     alarmMode.value = data.mode;
-    alarmScheduleOn.value = data.scheduleOn || "";
-    alarmScheduleOff.value = data.scheduleOff || "";
     alarmStatus.value = data.status;
+    // Only sync schedule times from server if we're not actively editing them
+    if (data.scheduleOn) alarmScheduleOn.value = data.scheduleOn;
+    if (data.scheduleOff) alarmScheduleOff.value = data.scheduleOff;
   } catch (e) {
     console.error("Failed to fetch alarm state:", e);
   }
@@ -233,7 +234,8 @@ async function setAlarmModeValue(mode) {
   }
 }
 
-async function setScheduleTimes() {
+async function onScheduleTimeChange() {
+  // Wait until both times are picked before sending to backend
   if (!alarmScheduleOn.value || !alarmScheduleOff.value) return;
   if (alarmScheduleOn.value >= alarmScheduleOff.value) return;
   if (alarmLoading.value) return;
