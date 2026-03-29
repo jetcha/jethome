@@ -16,8 +16,8 @@
       </header>
 
       <main class="content">
-        <!-- Alarm System Card -->
-        <div class="card">
+        <!-- Alarm System Group -->
+        <div class="card-parent">
           <div class="card-header">
             <span>Alarm System</span>
           </div>
@@ -48,49 +48,43 @@
             </div>
           </div>
         </div>
-
-        <!-- Schedule On Card -->
-        <div class="card" :class="{ disabled: alarmMode !== 'schedule' }">
-          <div class="card-header">
-            <span>Schedule On</span>
-          </div>
-          <div class="card-content">
-            <TimePicker
-              :modelValue="alarmScheduleOn"
-              :disabled="alarmMode !== 'schedule'"
-              @update:modelValue="alarmScheduleOn = $event; onScheduleTimeChange()"
-            />
-          </div>
-        </div>
-
-        <!-- Schedule Off Card -->
-        <div class="card" :class="{ disabled: alarmMode !== 'schedule' }">
-          <div class="card-header">
-            <span>Schedule Off</span>
-          </div>
-          <div class="card-content">
-            <TimePicker
-              :modelValue="alarmScheduleOff"
-              :disabled="alarmMode !== 'schedule'"
-              @update:modelValue="alarmScheduleOff = $event; onScheduleTimeChange()"
-            />
-          </div>
-        </div>
-
-        <!-- Alarm Status Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Alarm Status</span>
-          </div>
+        <div class="card-child">
+          <div class="card-header"><span>Status</span></div>
           <div class="card-content">
             <span class="alarm-status">
               {{ alarmStatus ? "ON" : "OFF" }}
             </span>
           </div>
         </div>
+        <div class="card-child" :class="{ disabled: alarmMode !== 'schedule' }">
+          <div class="card-header"><span>Schedule On</span></div>
+          <div class="card-content">
+            <TimePicker
+              :modelValue="alarmScheduleOn"
+              :disabled="alarmMode !== 'schedule'"
+              @update:modelValue="
+                alarmScheduleOn = $event;
+                onScheduleTimeChange();
+              "
+            />
+          </div>
+        </div>
+        <div class="card-child" :class="{ disabled: alarmMode !== 'schedule' }">
+          <div class="card-header"><span>Schedule Off</span></div>
+          <div class="card-content">
+            <TimePicker
+              :modelValue="alarmScheduleOff"
+              :disabled="alarmMode !== 'schedule'"
+              @update:modelValue="
+                alarmScheduleOff = $event;
+                onScheduleTimeChange();
+              "
+            />
+          </div>
+        </div>
 
         <!-- Camera Record Card -->
-        <div v-if="isAdmin" class="card">
+        <div v-if="isAdmin" class="card-parent">
           <div class="card-header">
             <span>Camera Record</span>
           </div>
@@ -116,11 +110,14 @@
           </div>
         </div>
 
-        <!-- Indoor Climate Card -->
-        <div class="card">
+        <!-- Climate Group -->
+        <div class="card-parent">
           <div class="card-header">
-            <span>Indoor Climate</span>
+            <span>Climate</span>
           </div>
+        </div>
+        <div class="card-child">
+          <div class="card-header"><span>Indoor</span></div>
           <div class="card-content">
             <div class="climate-value">
               {{
@@ -131,12 +128,8 @@
             </div>
           </div>
         </div>
-
-        <!-- Outdoor Climate Card -->
-        <div class="card">
-          <div class="card-header">
-            <span>Outdoor Climate</span>
-          </div>
+        <div class="card-child">
+          <div class="card-header"><span>Outdoor</span></div>
           <div class="card-content">
             <div class="climate-value">
               {{
@@ -149,7 +142,7 @@
         </div>
 
         <!-- Sun Times Card -->
-        <div class="card">
+        <div class="card-parent">
           <div class="card-header">
             <span>Sunrise / Sunset</span>
           </div>
@@ -195,7 +188,6 @@ const alarmSliderPosition = computed(() => {
   if (alarmMode.value === "schedule") return 100;
   return 200;
 });
-
 
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
@@ -428,11 +420,19 @@ onUnmounted(() => {
   display: block;
 }
 
-.card {
+.card-parent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0.75rem 0;
+  margin: 0.5rem 0rem;
+}
+
+.card-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0rem;
 }
 
 .card-header {
@@ -487,21 +487,15 @@ onUnmounted(() => {
   color: #ffffff;
 }
 
-.card.disabled {
+.card-child.disabled {
   opacity: 0.4;
   pointer-events: none;
 }
 
-.alarm-status {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #1c1c1c;
-}
-
+.alarm-status,
 .climate-value,
 .sun-time {
   font-size: 1rem;
-  font-weight: bold;
   color: #1c1c1c;
 }
 </style>

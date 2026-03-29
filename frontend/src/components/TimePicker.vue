@@ -99,7 +99,7 @@ function emitIfValid() {
   align-items: center;
   border: 1px solid #1c1c1c;
   border-radius: 1rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0.4rem;
 }
 
 .time-picker input {
