@@ -83,33 +83,6 @@
           </div>
         </div>
 
-        <!-- Camera Record Card -->
-        <div v-if="isAdmin" class="card-parent">
-          <div class="card-header">
-            <span>Camera Record</span>
-          </div>
-          <div class="card-content">
-            <div class="toggle-switch">
-              <div
-                class="toggle-slider"
-                :class="{ active: recordingEnabled }"
-              ></div>
-              <span
-                class="toggle-option"
-                :class="{ selected: recordingEnabled }"
-                @click="setRecordingState(true)"
-                >ON</span
-              >
-              <span
-                class="toggle-option"
-                :class="{ selected: !recordingEnabled }"
-                @click="setRecordingState(false)"
-                >OFF</span
-              >
-            </div>
-          </div>
-        </div>
-
         <!-- Climate Group -->
         <div class="card-parent">
           <div class="card-header">
@@ -137,6 +110,33 @@
               }}
               /
               {{ humidityOutdoor !== null ? `${humidityOutdoor}%` : "..." }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Camera Record Card -->
+        <div v-if="isAdmin" class="card-parent">
+          <div class="card-header">
+            <span>Camera Record</span>
+          </div>
+          <div class="card-content">
+            <div class="toggle-switch">
+              <div
+                class="toggle-slider"
+                :class="{ active: recordingEnabled }"
+              ></div>
+              <span
+                class="toggle-option"
+                :class="{ selected: recordingEnabled }"
+                @click="setRecordingState(true)"
+                >ON</span
+              >
+              <span
+                class="toggle-option"
+                :class="{ selected: !recordingEnabled }"
+                @click="setRecordingState(false)"
+                >OFF</span
+              >
             </div>
           </div>
         </div>

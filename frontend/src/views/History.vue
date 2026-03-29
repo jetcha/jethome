@@ -85,6 +85,7 @@ onMounted(() => {
 h2 {
   font-size: 1rem;
   margin-bottom: 0.5rem;
+  font-weight: 400;
 }
 
 .chart-section {
