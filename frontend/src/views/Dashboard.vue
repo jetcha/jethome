@@ -424,7 +424,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0.5rem 0rem;
+  margin: 0.4rem 0rem;
 }
 
 .card-child {
@@ -432,7 +432,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-left: 1.5rem;
-  margin: 0.5rem 0rem;
+  margin: 0.4rem 0rem;
 }
 
 .card-header {

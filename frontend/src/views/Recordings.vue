@@ -3,7 +3,11 @@
     <div class="page-container">
       <div class="page-header">
         <h1 class="page-title">
-          {{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : 'Recordings' }}
+          {{
+            selectedSegment
+              ? formatTimestamp(selectedSegment.timestamp)
+              : "Recordings"
+          }}
         </h1>
         <div class="header-actions">
           <button class="header-btn" @click="handleBack">BACK</button>
@@ -47,11 +51,7 @@
               &nbsp;
             </div>
             <div v-if="totalPages > 1" class="pagination">
-              <button
-                class="header-btn"
-                :disabled="page === 0"
-                @click="page--"
-              >
+              <button class="header-btn" :disabled="page === 0" @click="page--">
                 PREV
               </button>
               <span class="page-info">{{ page + 1 }} / {{ totalPages }}</span>
@@ -183,7 +183,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0rem;
   cursor: pointer;
   border-radius: 0.5rem;
   transition: background 0.15s;
@@ -198,11 +198,11 @@ onMounted(() => {
 }
 
 .segment-time {
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .segment-size {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #999;
 }
 
@@ -211,11 +211,11 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 .page-info {
   font-size: 0.9rem;
-  color: #666;
+  color: #1c1c1c;
 }
 </style>
