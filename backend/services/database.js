@@ -63,9 +63,11 @@ export function getClimateHistoryByRange(location, from, to) {
     tsExpr =
       "strftime('%Y-%m-%d', timestamp) || ' ' || printf('%02d:00:00', (CAST(strftime('%H', timestamp) AS INTEGER) / 6) * 6)";
   } else {
-    // Daily
-    groupExpr = "strftime('%Y-%m-%d', timestamp)";
-    tsExpr = "strftime('%Y-%m-%d 00:00:00', timestamp)";
+    // Every 12 hours
+    groupExpr =
+      "strftime('%Y-%m-%d', timestamp) || ' ' || printf('%02d', (CAST(strftime('%H', timestamp) AS INTEGER) / 12) * 12)";
+    tsExpr =
+      "strftime('%Y-%m-%d', timestamp) || ' ' || printf('%02d:00:00', (CAST(strftime('%H', timestamp) AS INTEGER) / 12) * 12)";
   }
 
   const stmt = db.prepare(`
