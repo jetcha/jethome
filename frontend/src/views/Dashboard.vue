@@ -51,7 +51,7 @@
         <div class="card-child">
           <div class="card-header"><span>Status</span></div>
           <div class="card-content">
-            <span class="alarm-status">
+            <span class="card-value">
               {{ alarmStatus ? "ON" : "OFF" }}
             </span>
           </div>
@@ -92,7 +92,7 @@
         <div class="card-child">
           <div class="card-header"><span>Indoor</span></div>
           <div class="card-content">
-            <div class="climate-value">
+            <div class="card-value">
               {{
                 temperatureIndoor !== null ? `${temperatureIndoor}°C` : "..."
               }}
@@ -104,7 +104,7 @@
         <div class="card-child">
           <div class="card-header"><span>Outdoor</span></div>
           <div class="card-content">
-            <div class="climate-value">
+            <div class="card-value">
               {{
                 temperatureOutdoor !== null ? `${temperatureOutdoor}°C` : "..."
               }}
@@ -114,42 +114,26 @@
           </div>
         </div>
 
-        <!-- Camera Record Card -->
-        <div v-if="isAdmin" class="card-parent">
-          <div class="card-header">
-            <span>Camera Record</span>
-          </div>
-          <div class="card-content">
-            <div class="toggle-switch">
-              <div
-                class="toggle-slider"
-                :class="{ active: recordingEnabled }"
-              ></div>
-              <span
-                class="toggle-option"
-                :class="{ selected: recordingEnabled }"
-                @click="setRecordingState(true)"
-                >ON</span
-              >
-              <span
-                class="toggle-option"
-                :class="{ selected: !recordingEnabled }"
-                @click="setRecordingState(false)"
-                >OFF</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Sun Times Card -->
+        <!-- Daylight Group -->
         <div class="card-parent">
           <div class="card-header">
-            <span>Sunrise / Sunset</span>
+            <span>Daylight</span>
+          </div>
+        </div>
+        <div class="card-child">
+          <div class="card-header">
+            <span>Sunrise</span>
           </div>
           <div class="card-content">
-            <div class="sun-time">
-              {{ sunrise ?? "..." }} / {{ sunset ?? "..." }}
-            </div>
+            <span class="card-value">{{ sunrise ?? "..." }}</span>
+          </div>
+        </div>
+        <div class="card-child">
+          <div class="card-header">
+            <span>Sunset</span>
+          </div>
+          <div class="card-content">
+            <span class="card-value">{{ sunset ?? "..." }}</span>
           </div>
         </div>
       </main>
@@ -171,8 +155,6 @@ import {
   getVapidPublicKey,
   subscribeToPush,
   getSunTimes,
-  getRecording,
-  setRecording,
 } from "../api.js";
 const router = useRouter();
 
@@ -189,8 +171,6 @@ const alarmSliderPosition = computed(() => {
   return 200;
 });
 
-const recordingEnabled = ref(false);
-const recordingLoading = ref(false);
 const temperatureIndoor = ref(null);
 const humidityIndoor = ref(null);
 const temperatureOutdoor = ref(null);
@@ -247,29 +227,6 @@ async function onScheduleTimeChange() {
     console.error("Failed to set schedule:", e);
   } finally {
     alarmLoading.value = false;
-  }
-}
-
-async function fetchRecording() {
-  try {
-    const data = await getRecording();
-    recordingEnabled.value = data.enabled;
-  } catch (e) {
-    console.error("Failed to fetch recording state:", e);
-  }
-}
-
-async function setRecordingState(enabled) {
-  if (recordingEnabled.value === enabled || recordingLoading.value) return;
-
-  recordingLoading.value = true;
-  try {
-    const data = await setRecording(enabled);
-    recordingEnabled.value = data.enabled;
-  } catch (e) {
-    console.error("Failed to set recording:", e);
-  } finally {
-    recordingLoading.value = false;
   }
 }
 
@@ -378,7 +335,6 @@ function handleVisibilityChange() {
   // Refresh data when coming back to the view
   if (document.visibilityState === "visible") {
     fetchAlarm();
-    fetchRecording();
     fetchClimateIndoor();
     fetchClimateOutdoor();
     fetchSunTimes();
@@ -391,7 +347,6 @@ onMounted(() => {
 
   setupPushNotifications();
   fetchAlarm();
-  fetchRecording();
   fetchClimateIndoor();
   fetchClimateOutdoor();
   fetchSunTimes();
@@ -418,86 +373,5 @@ onUnmounted(() => {
   width: 1rem;
   height: 1rem;
   display: block;
-}
-
-.card-parent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.4rem 0rem;
-}
-
-.card-child {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: 1.5rem;
-  margin: 0.4rem 0rem;
-}
-
-.card-header {
-  font-size: 1rem;
-}
-
-.toggle-switch {
-  display: flex;
-  position: relative;
-  border: 1px solid #1c1c1c;
-  border-radius: 1rem;
-  cursor: pointer;
-  width: 6rem;
-}
-
-.toggle-slider {
-  position: absolute;
-  width: 51%;
-  left: -0.5%;
-  height: 100%;
-  background: #1c1c1c;
-  border-radius: 1rem;
-  transition: transform 0.2s ease;
-}
-
-.toggle-switch.triple {
-  width: 9rem;
-}
-
-.toggle-switch.triple .toggle-slider {
-  width: 33.83%;
-  left: -0.8%;
-}
-
-.toggle-slider.active {
-  transform: translateX(0);
-}
-
-.toggle-slider:not(.active) {
-  transform: translateX(100%);
-}
-
-.toggle-option {
-  flex: 1;
-  text-align: center;
-  padding: 0.4rem 0;
-  font-size: 0.9rem;
-  z-index: 1;
-  color: #1c1c1c;
-  transition: color 0.2s;
-}
-
-.toggle-option.selected {
-  color: #ffffff;
-}
-
-.card-child.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.alarm-status,
-.climate-value,
-.sun-time {
-  font-size: 1rem;
-  color: #1c1c1c;
 }
 </style>

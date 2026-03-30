@@ -18,6 +18,29 @@
           />
           <div v-else class="camera-offline">Camera Unavailable</div>
         </div>
+        <div class="card-parent">
+          <div class="card-header">
+            <span>Recording</span>
+          </div>
+          <div class="toggle-switch">
+            <div
+              class="toggle-slider"
+              :class="{ active: recordingEnabled }"
+            ></div>
+            <span
+              class="toggle-option"
+              :class="{ selected: recordingEnabled }"
+              @click="setRecordingState(true)"
+              >ON</span
+            >
+            <span
+              class="toggle-option"
+              :class="{ selected: !recordingEnabled }"
+              @click="setRecordingState(false)"
+              >OFF</span
+            >
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -26,9 +49,12 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { getRecording, setRecording } from "../api.js";
 
 const router = useRouter();
 const streamUrl = ref(null);
+const recordingEnabled = ref(false);
+const recordingLoading = ref(false);
 
 function goBack() {
   router.push("/dashboard");
@@ -38,11 +64,34 @@ function goToRecordings() {
   router.push("/recordings");
 }
 
+async function fetchRecording() {
+  try {
+    const data = await getRecording();
+    recordingEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to fetch recording state:", e);
+  }
+}
+
+async function setRecordingState(enabled) {
+  if (recordingEnabled.value === enabled || recordingLoading.value) return;
+  recordingLoading.value = true;
+  try {
+    const data = await setRecording(enabled);
+    recordingEnabled.value = data.enabled;
+  } catch (e) {
+    console.error("Failed to set recording:", e);
+  } finally {
+    recordingLoading.value = false;
+  }
+}
+
 onMounted(() => {
   const token = localStorage.getItem("jet-home-token");
   if (token) {
     streamUrl.value = `/api/cam/video?token=${token}`;
   }
+  fetchRecording();
 });
 
 onBeforeUnmount(() => {
