@@ -42,9 +42,10 @@ function getTimeUnit(data) {
   const first = new Date(data[0].timestamp + "Z");
   const last = new Date(data[data.length - 1].timestamp + "Z");
   const days = (last - first) / (1000 * 60 * 60 * 24);
-  if (days <= 2) return { unit: "hour", format: "HH:mm", ticks: 12 };
-  if (days <= 14) return { unit: "day", format: "EEE d", ticks: 7 };
-  return { unit: "day", format: "d MMM", ticks: 10 };
+  if (days <= 7) return { unit: "day", format: "EEE d", ticks: 7 };
+  if (days <= 30) return { unit: "day", format: "d MMM", ticks: 10 };
+  if (days <= 90) return { unit: "week", format: "d MMM", ticks: 12 };
+  return { unit: "month", format: "MMM yyyy", ticks: 12 };
 }
 
 const chartCanvas = ref(null);

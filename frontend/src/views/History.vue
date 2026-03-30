@@ -23,25 +23,6 @@
       </header>
 
       <main class="content">
-        <div class="card-parent">
-          <div class="card-header"><span>Start Date</span></div>
-          <div class="card-content">
-            <DatePicker
-              :modelValue="startDate"
-              @update:modelValue="onStartDateChange"
-            />
-          </div>
-        </div>
-        <div class="card-parent">
-          <div class="card-header"><span>End Date</span></div>
-          <div class="card-content">
-            <DatePicker
-              :modelValue="endDate"
-              @update:modelValue="onEndDateChange"
-            />
-          </div>
-        </div>
-
         <section class="chart-section">
           <h2>Temperature (°C)</h2>
           <ClimateChart :data="historyData" dataKey="temperature" />
@@ -51,6 +32,26 @@
           <h2>Humidity (%)</h2>
           <ClimateChart :data="historyData" dataKey="humidity" />
         </section>
+
+        <div class="card-parent">
+          <div class="card-header"><span>Start Date</span></div>
+          <div class="card-content">
+            <DatePicker
+              :modelValue="startDate"
+              @update:modelValue="onStartDateChange"
+            />
+          </div>
+        </div>
+
+        <div class="card-parent">
+          <div class="card-header"><span>End Date</span></div>
+          <div class="card-content">
+            <DatePicker
+              :modelValue="endDate"
+              @update:modelValue="onEndDateChange"
+            />
+          </div>
+        </div>
       </main>
     </div>
   </div>
