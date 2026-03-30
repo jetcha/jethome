@@ -40,7 +40,7 @@ export function startRecording() {
   ffmpegProcess = spawn("ffmpeg", [
     "-i", CAMERA_STREAM_URL,
     "-c:v", "libx264",
-    "-preset", "ultrafast",
+    "-preset", "fast",
     "-crf", "28",
     "-r", "16",
     "-an",
