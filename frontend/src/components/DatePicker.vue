@@ -150,16 +150,17 @@ function padAndEmit() {
 }
 
 function emitIfValid() {
-  if (day.value.length === 2 && month.value.length === 2 && year.value.length === 4) {
+  if (
+    day.value.length === 2 &&
+    month.value.length === 2 &&
+    year.value.length === 4
+  ) {
     const d = parseInt(day.value, 10);
     const m = parseInt(month.value, 10);
     const y = parseInt(year.value, 10);
     const max = daysInMonth(month.value, year.value);
     if (d >= 1 && d <= max && m >= 1 && m <= 12 && y >= 2020 && y <= 2099) {
-      emit(
-        "update:modelValue",
-        `${year.value}-${month.value}-${day.value}`
-      );
+      emit("update:modelValue", `${year.value}-${month.value}-${day.value}`);
     }
   }
 }

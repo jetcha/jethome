@@ -38,18 +38,29 @@ export function startRecording() {
   const outputPattern = path.join(dir, "rec_%Y-%m-%d_%H-%M-%S.mp4");
 
   ffmpegProcess = spawn("ffmpeg", [
-    "-i", CAMERA_STREAM_URL,
-    "-c:v", "libx264",
-    "-preset", "fast",
-    "-crf", "28",
-    "-r", "16",
+    "-i",
+    CAMERA_STREAM_URL,
+    "-c:v",
+    "libx264",
+    "-preset",
+    "fast",
+    "-crf",
+    "28",
+    "-r",
+    "16",
     "-an",
-    "-f", "segment",
-    "-segment_time", String(SEGMENT_DURATION_SECONDS),
-    "-segment_format", "mp4",
-    "-reset_timestamps", "1",
-    "-strftime", "1",
-    "-movflags", "+faststart",
+    "-f",
+    "segment",
+    "-segment_time",
+    String(SEGMENT_DURATION_SECONDS),
+    "-segment_format",
+    "mp4",
+    "-reset_timestamps",
+    "1",
+    "-strftime",
+    "1",
+    "-movflags",
+    "+faststart",
     outputPattern,
   ]);
 
@@ -79,7 +90,10 @@ export function startRecording() {
   // Start cleanup interval if not already running
   if (!cleanupInterval) {
     cleanupOldSegments();
-    cleanupInterval = setInterval(cleanupOldSegments, RETENTION_CLEANUP_INTERVAL_MS);
+    cleanupInterval = setInterval(
+      cleanupOldSegments,
+      RETENTION_CLEANUP_INTERVAL_MS
+    );
   }
 }
 
