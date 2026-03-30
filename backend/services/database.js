@@ -25,20 +25,9 @@ export function saveClimateReading(location, temperature, humidity) {
   stmt.run(location, temperature, humidity);
 }
 
-export function getClimateHistory(location, hours) {
-  const stmt = db.prepare(`
-    SELECT temperature, humidity, timestamp
-    FROM climate_history
-    WHERE location = ?
-      AND timestamp > datetime('now', '-' || ? || ' hours')
-    ORDER BY timestamp ASC
-  `);
-  return stmt.all(location, hours);
-}
-
 export function getClimateHistoryAggregated(location, hours) {
   const stmt = db.prepare(`
-    SELECT 
+    SELECT
       ROUND(AVG(temperature), 1) as temperature,
       ROUND(AVG(humidity), 1) as humidity,
       strftime('%Y-%m-%d %H:00:00', timestamp) as timestamp
@@ -49,4 +38,20 @@ export function getClimateHistoryAggregated(location, hours) {
     ORDER BY timestamp ASC
   `);
   return stmt.all(location, hours);
+}
+
+export function getClimateHistoryByRange(location, from, to) {
+  const stmt = db.prepare(`
+    SELECT
+      ROUND(AVG(temperature), 1) as temperature,
+      ROUND(AVG(humidity), 1) as humidity,
+      strftime('%Y-%m-%d %H:00:00', timestamp) as timestamp
+    FROM climate_history
+    WHERE location = ?
+      AND timestamp >= ?
+      AND timestamp < ?
+    GROUP BY strftime('%Y-%m-%d %H', timestamp)
+    ORDER BY timestamp ASC
+  `);
+  return stmt.all(location, from, to);
 }

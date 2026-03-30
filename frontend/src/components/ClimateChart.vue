@@ -37,6 +37,16 @@ const props = defineProps({
   },
 });
 
+function getTimeUnit(data) {
+  if (data.length < 2) return { unit: "day", format: "EEE d", ticks: 7 };
+  const first = new Date(data[0].timestamp + "Z");
+  const last = new Date(data[data.length - 1].timestamp + "Z");
+  const days = (last - first) / (1000 * 60 * 60 * 24);
+  if (days <= 2) return { unit: "hour", format: "HH:mm", ticks: 12 };
+  if (days <= 14) return { unit: "day", format: "EEE d", ticks: 7 };
+  return { unit: "day", format: "d MMM", ticks: 10 };
+}
+
 const chartCanvas = ref(null);
 let chart = null;
 
@@ -44,6 +54,7 @@ function createChart() {
   if (!chartCanvas.value || !props.data.length) return;
 
   const ctx = chartCanvas.value.getContext("2d");
+  const timeConfig = getTimeUnit(props.data);
 
   chart = new Chart(ctx, {
     type: "line",
@@ -73,13 +84,14 @@ function createChart() {
         x: {
           type: "time",
           time: {
-            unit: "day",
+            unit: timeConfig.unit,
             displayFormats: {
-              day: "EEE d",
+              hour: timeConfig.format,
+              day: timeConfig.format,
             },
           },
           ticks: {
-            maxTicksLimit: 7,
+            maxTicksLimit: timeConfig.ticks,
             color: "#1c1c1c",
           },
           grid: {
@@ -120,11 +132,10 @@ function updateChart() {
     return;
   }
 
-  chart.data.datasets[0].data = props.data.map((d) => ({
-    x: new Date(d.timestamp + "Z"),
-    y: d[props.dataKey],
-  }));
-  chart.update();
+  // Recreate chart when time range changes so axis adapts
+  chart.destroy();
+  chart = null;
+  createChart();
 }
 
 watch(() => props.data, updateChart, { deep: true });

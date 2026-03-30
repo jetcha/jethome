@@ -103,8 +103,10 @@ export async function getSunTimes() {
   return api("/api/isDark");
 }
 
-export async function getClimateHistory(location = "indoor", hours = 168) {
-  return api(`/api/climate/history?location=${location}&hours=${hours}`);
+export async function getClimateHistoryByRange(location, from, to) {
+  return api(
+    `/api/climate/history?location=${location}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+  );
 }
 
 export async function getRecording() {
