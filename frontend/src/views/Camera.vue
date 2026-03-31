@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
   padding: 3rem;
   text-align: center;
   color: #999;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 4 / 3;
   display: flex;
   align-items: center;
   justify-content: center;
