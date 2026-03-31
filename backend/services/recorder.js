@@ -2,129 +2,148 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import {
-  CAMERA_STREAM_URL,
-  CAMERA_AUDIO_URL,
-  RECORDINGS_DIR,
+  PIXEL6_STREAM_URL,
+  PIXEL6_AUDIO_URL,
+  PI3_RTSP_URL,
+  RECORDINGS_BASE_DIR,
   SEGMENT_DURATION_SECONDS,
   RETENTION_HOURS,
   RETENTION_CLEANUP_INTERVAL_MS,
 } from "../config/constants.js";
 
-let ffmpegProcess = null;
-let cleanupInterval = null;
-let restartTimeout = null;
-let recording = false;
-
 const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
 
-function getRecordingsPath() {
-  return path.resolve(RECORDINGS_DIR);
+const cameras = {
+  pixel6: {
+    ffmpegProcess: null,
+    cleanupInterval: null,
+    restartTimeout: null,
+    recording: false,
+    dir: "pixel6_recordings",
+    getArgs(outputPattern) {
+      return [
+        "-i", PIXEL6_STREAM_URL,
+        "-i", PIXEL6_AUDIO_URL,
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-crf", "23",
+        "-r", "24",
+        "-c:a", "aac",
+        "-b:a", "96k",
+        "-f", "segment",
+        "-segment_time", String(SEGMENT_DURATION_SECONDS),
+        "-segment_format", "mp4",
+        "-reset_timestamps", "1",
+        "-strftime", "1",
+        "-movflags", "+faststart",
+        outputPattern,
+      ];
+    },
+  },
+  pi3: {
+    ffmpegProcess: null,
+    cleanupInterval: null,
+    restartTimeout: null,
+    recording: false,
+    dir: "pi3_recordings",
+    getArgs(outputPattern) {
+      return [
+        "-rtsp_transport", "tcp",
+        "-i", PI3_RTSP_URL,
+        "-c:v", "copy",
+        "-f", "segment",
+        "-segment_time", String(SEGMENT_DURATION_SECONDS),
+        "-segment_format", "mp4",
+        "-reset_timestamps", "1",
+        "-strftime", "1",
+        "-movflags", "+faststart",
+        outputPattern,
+      ];
+    },
+  },
+};
+
+function getRecordingsPath(camId) {
+  return path.resolve(RECORDINGS_BASE_DIR, cameras[camId].dir);
 }
 
-export function isRecording() {
-  return recording;
+export function isRecording(camId) {
+  return cameras[camId]?.recording ?? false;
 }
 
-export function startRecording() {
-  const dir = getRecordingsPath();
+export function startRecording(camId) {
+  const cam = cameras[camId];
+  if (!cam) return;
+
+  const dir = getRecordingsPath(camId);
   fs.mkdirSync(dir, { recursive: true });
 
-  recording = true;
+  cam.recording = true;
 
-  if (ffmpegProcess) {
-    console.log("[Recorder] Already recording");
+  if (cam.ffmpegProcess) {
+    console.log(`[Recorder:${camId}] Already recording`);
     return;
   }
 
   const outputPattern = path.join(dir, "rec_%Y-%m-%d_%H-%M-%S.mp4");
 
-  ffmpegProcess = spawn("ffmpeg", [
-    "-i",
-    CAMERA_STREAM_URL,
-    "-i",
-    CAMERA_AUDIO_URL,
-    "-c:v",
-    "libx264",
-    "-preset",
-    "fast",
-    "-crf",
-    "23",
-    "-r",
-    "24",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "96k",
-    "-f",
-    "segment",
-    "-segment_time",
-    String(SEGMENT_DURATION_SECONDS),
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-movflags",
-    "+faststart",
-    outputPattern,
-  ]);
+  cam.ffmpegProcess = spawn("ffmpeg", cam.getArgs(outputPattern));
 
-  ffmpegProcess.stderr.on("data", (data) => {
-    // FFmpeg logs to stderr by default, only log errors
+  cam.ffmpegProcess.stderr.on("data", (data) => {
     const msg = data.toString();
     if (msg.includes("Error") || msg.includes("error")) {
-      console.error("[Recorder]", msg.trim());
+      console.error(`[Recorder:${camId}]`, msg.trim());
     }
   });
 
-  ffmpegProcess.on("exit", (code) => {
-    console.log(`[Recorder] FFmpeg exited with code ${code}`);
-    ffmpegProcess = null;
+  cam.ffmpegProcess.on("exit", (code) => {
+    console.log(`[Recorder:${camId}] FFmpeg exited with code ${code}`);
+    cam.ffmpegProcess = null;
 
-    // Only auto-restart if recording is still enabled
-    if (recording) {
-      restartTimeout = setTimeout(() => {
-        console.log("[Recorder] Restarting FFmpeg...");
-        startRecording();
+    if (cam.recording) {
+      cam.restartTimeout = setTimeout(() => {
+        console.log(`[Recorder:${camId}] Restarting FFmpeg...`);
+        startRecording(camId);
       }, 5000);
     }
   });
 
-  console.log("[Recorder] Started recording");
+  console.log(`[Recorder:${camId}] Started recording`);
 
-  // Start cleanup interval if not already running
-  if (!cleanupInterval) {
-    cleanupOldSegments();
-    cleanupInterval = setInterval(
-      cleanupOldSegments,
+  if (!cam.cleanupInterval) {
+    cleanupOldSegments(camId);
+    cam.cleanupInterval = setInterval(
+      () => cleanupOldSegments(camId),
       RETENTION_CLEANUP_INTERVAL_MS
     );
   }
 }
 
-export function stopRecording() {
-  recording = false;
+export function stopRecording(camId) {
+  const cam = cameras[camId];
+  if (!cam) return;
 
-  if (restartTimeout) {
-    clearTimeout(restartTimeout);
-    restartTimeout = null;
+  cam.recording = false;
+
+  if (cam.restartTimeout) {
+    clearTimeout(cam.restartTimeout);
+    cam.restartTimeout = null;
   }
 
-  if (cleanupInterval) {
-    clearInterval(cleanupInterval);
-    cleanupInterval = null;
+  if (cam.cleanupInterval) {
+    clearInterval(cam.cleanupInterval);
+    cam.cleanupInterval = null;
   }
 
-  if (ffmpegProcess) {
-    ffmpegProcess.kill("SIGINT"); // Graceful stop, finalizes current segment
-    ffmpegProcess = null;
-    console.log("[Recorder] Stopped recording");
+  if (cam.ffmpegProcess) {
+    cam.ffmpegProcess.kill("SIGINT");
+    cam.ffmpegProcess = null;
+    console.log(`[Recorder:${camId}] Stopped recording`);
   }
 }
 
-export function getSegments() {
-  const dir = getRecordingsPath();
+export function getSegments(camId) {
+  const dir = getRecordingsPath(camId);
 
   if (!fs.existsSync(dir)) return [];
 
@@ -137,7 +156,6 @@ export function getSegments() {
     return { filename, timestamp, size: stat.size };
   });
 
-  // Exclude the segment currently being written (modified in the last 30s)
   const now = Date.now();
   return segments
     .filter((s) => {
@@ -149,7 +167,6 @@ export function getSegments() {
 }
 
 function parseTimestamp(filename) {
-  // rec_2026-03-28_14-20-00.mp4 -> 2026-03-28T14:20:00
   const match = filename.match(
     /rec_(\d{4}-\d{2}-\d{2})_(\d{2})-(\d{2})-(\d{2})\.mp4/
   );
@@ -157,8 +174,8 @@ function parseTimestamp(filename) {
   return `${match[1]}T${match[2]}:${match[3]}:${match[4]}`;
 }
 
-function cleanupOldSegments() {
-  const dir = getRecordingsPath();
+function cleanupOldSegments(camId) {
+  const dir = getRecordingsPath(camId);
   if (!fs.existsSync(dir)) return;
 
   const cutoff = Date.now() - RETENTION_HOURS * 60 * 60 * 1000;
@@ -168,7 +185,7 @@ function cleanupOldSegments() {
     const timestamp = parseTimestamp(filename);
     if (timestamp && new Date(timestamp).getTime() < cutoff) {
       fs.unlinkSync(path.join(dir, filename));
-      console.log(`[Recorder] Deleted old segment: ${filename}`);
+      console.log(`[Recorder:${camId}] Deleted old segment: ${filename}`);
     }
   }
 }

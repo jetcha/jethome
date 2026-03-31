@@ -109,22 +109,27 @@ export async function getClimateHistoryByRange(location, from, to) {
   );
 }
 
-export async function getRecording() {
-  return api("/api/cam/recording");
+export async function getRecording(camId) {
+  return api(`/api/cam/${camId}/recording`);
 }
 
-export async function setRecording(enabled) {
-  return api("/api/cam/recording", {
+export async function setRecording(camId, enabled) {
+  return api(`/api/cam/${camId}/recording`, {
     method: "POST",
     body: JSON.stringify({ enabled }),
   });
 }
 
-export async function getRecordings() {
-  return api("/api/cam/recordings");
+export async function getRecordings(camId) {
+  return api(`/api/cam/${camId}/recordings`);
 }
 
-export function getRecordingUrl(filename) {
+export function getRecordingUrl(camId, filename) {
   const token = getToken();
-  return `${API_BASE}/api/cam/recordings/${filename}?token=${token}`;
+  return `${API_BASE}/api/cam/${camId}/recordings/${filename}?token=${token}`;
+}
+
+export function getStreamUrl(camId) {
+  const token = getToken();
+  return `${API_BASE}/api/cam/${camId}/video?token=${token}`;
 }

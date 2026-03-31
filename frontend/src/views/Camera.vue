@@ -11,8 +11,17 @@
       <div class="content">
         <div class="camera-feed">
           <img
-            v-if="streamUrl"
-            :src="streamUrl"
+            v-if="pixel6StreamUrl"
+            :src="pixel6StreamUrl"
+            alt="Live Camera Feed"
+            class="camera-stream"
+          />
+          <div v-else class="camera-offline">Camera Unavailable</div>
+        </div>
+        <div class="camera-feed">
+          <img
+            v-if="pi3StreamUrl"
+            :src="pi3StreamUrl"
             alt="Live Camera Feed"
             class="camera-stream"
           />
@@ -49,10 +58,11 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { getRecording, setRecording } from "../api.js";
+import { getRecording, setRecording, getStreamUrl } from "../api.js";
 
 const router = useRouter();
-const streamUrl = ref(null);
+const pixel6StreamUrl = ref(null);
+const pi3StreamUrl = ref(null);
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
 
@@ -66,8 +76,11 @@ function goToRecordings() {
 
 async function fetchRecording() {
   try {
-    const data = await getRecording();
-    recordingEnabled.value = data.enabled;
+    const [pixel6, pi3] = await Promise.all([
+      getRecording("pixel6"),
+      getRecording("pi3"),
+    ]);
+    recordingEnabled.value = pixel6.enabled || pi3.enabled;
   } catch (e) {
     console.error("Failed to fetch recording state:", e);
   }
@@ -77,8 +90,11 @@ async function setRecordingState(enabled) {
   if (recordingEnabled.value === enabled || recordingLoading.value) return;
   recordingLoading.value = true;
   try {
-    const data = await setRecording(enabled);
-    recordingEnabled.value = data.enabled;
+    await Promise.all([
+      setRecording("pixel6", enabled),
+      setRecording("pi3", enabled),
+    ]);
+    recordingEnabled.value = enabled;
   } catch (e) {
     console.error("Failed to set recording:", e);
   } finally {
@@ -87,15 +103,14 @@ async function setRecordingState(enabled) {
 }
 
 onMounted(() => {
-  const token = localStorage.getItem("jet-home-token");
-  if (token) {
-    streamUrl.value = `/api/cam/video?token=${token}`;
-  }
+  pixel6StreamUrl.value = getStreamUrl("pixel6");
+  pi3StreamUrl.value = getStreamUrl("pi3");
   fetchRecording();
 });
 
 onBeforeUnmount(() => {
-  streamUrl.value = null;
+  pixel6StreamUrl.value = null;
+  pi3StreamUrl.value = null;
 });
 </script>
 

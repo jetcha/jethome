@@ -26,12 +26,17 @@ export const MQTT_BROKER_URL = "mqtt://localhost:1883";
 // Database
 export const DATABASE_PATH = "climate_history.db";
 
-// Camera & Recording
-export const CAMERA_HOST = "192.168.1.87";
-export const CAMERA_PORT = 8080;
-export const CAMERA_STREAM_URL = `http://${CAMERA_HOST}:${CAMERA_PORT}/video`;
-export const CAMERA_AUDIO_URL = `http://${CAMERA_HOST}:${CAMERA_PORT}/audio.wav`;
-export const RECORDINGS_DIR = "/mnt/pi4cloud";
+// Pixel 6 (IP Webcam)
+export const PIXEL6_HOST = "192.168.1.87";
+export const PIXEL6_PORT = 8080;
+export const PIXEL6_STREAM_URL = `http://${PIXEL6_HOST}:${PIXEL6_PORT}/video`;
+export const PIXEL6_AUDIO_URL = `http://${PIXEL6_HOST}:${PIXEL6_PORT}/audio.wav`;
+
+// Pi 3B (Pi Camera v2.1 via mediamtx RTSP)
+export const PI3_RTSP_URL = "rtsp://192.168.1.89:8554/pi3cam";
+
+// Recording
+export const RECORDINGS_BASE_DIR = "/mnt/pi4cloud";
 export const SEGMENT_DURATION_SECONDS = 1200; // 20 minutes
 export const RETENTION_HOURS = 72;
 export const RETENTION_CLEANUP_INTERVAL_MS = 3600000; // 1 hour

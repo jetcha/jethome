@@ -10,6 +10,20 @@
           }}
         </h1>
         <div class="header-actions">
+          <button
+            class="header-btn"
+            :class="{ active: activeCam === 'pixel6' }"
+            @click="setCam('pixel6')"
+          >
+            PIXEL6
+          </button>
+          <button
+            class="header-btn"
+            :class="{ active: activeCam === 'pi3' }"
+            @click="setCam('pi3')"
+          >
+            PI3
+          </button>
           <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
@@ -82,6 +96,7 @@ const segments = ref([]);
 const selectedSegment = ref(null);
 const loading = ref(true);
 const page = ref(0);
+const activeCam = ref("pixel6");
 
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(segments.value.length / PAGE_SIZE))
@@ -94,7 +109,7 @@ const pagedSegments = computed(() => {
 
 const videoSrc = computed(() => {
   if (!selectedSegment.value) return null;
-  return getRecordingUrl(selectedSegment.value.filename);
+  return getRecordingUrl(activeCam.value, selectedSegment.value.filename);
 });
 
 function handleBack() {
@@ -103,6 +118,14 @@ function handleBack() {
   } else {
     router.push("/camera");
   }
+}
+
+function setCam(camId) {
+  if (activeCam.value === camId) return;
+  activeCam.value = camId;
+  selectedSegment.value = null;
+  page.value = 0;
+  fetchRecordings();
 }
 
 function selectSegment(seg) {
@@ -147,7 +170,7 @@ function formatSize(bytes) {
 async function fetchRecordings() {
   loading.value = true;
   try {
-    const data = await getRecordings();
+    const data = await getRecordings(activeCam.value);
     segments.value = data.segments;
   } catch (e) {
     console.error("Failed to fetch recordings:", e);
