@@ -85,9 +85,10 @@ router.get("/cam/pi3/video", (req, res) => {
     "-analyzeduration", "0",     // Skip input analysis delay
     "-rtsp_transport", "tcp",
     "-i", PI3_RTSP_URL,
+    "-vf", "scale=640:480",      // Scale down for preview (recordings stay full res)
     "-f", "mjpeg",
-    "-q:v", "5",
-    "-r", "15",
+    "-q:v", "8",                 // Lower quality = smaller JPEGs = faster transfer
+    "-r", "10",                  // 10fps is enough for a preview
     "-an",
     "pipe:1",
   ]);
