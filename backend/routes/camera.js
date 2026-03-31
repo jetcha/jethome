@@ -100,29 +100,35 @@ router.get("/cam/pi3/video", (req, res) => {
 
   // Buffer to collect incoming data chunks until we have a full JPEG
   let buffer = Buffer.alloc(0);
+  // Only send the latest frame - if a new frame arrives before the
+  // previous one finishes sending, skip the old one to prevent backlog
+  let sending = false;
 
   ffmpeg.stdout.on("data", (chunk) => {
     buffer = Buffer.concat([buffer, chunk]);
 
-    // Keep extracting complete JPEG frames from the buffer
+    // Extract all complete frames, but only keep the latest one
+    let latestFrame = null;
     while (true) {
-      // Find JPEG start marker (SOI = 0xFFD8)
       const soi = buffer.indexOf(Buffer.from([0xff, 0xd8]));
       if (soi === -1) break;
 
-      // Find JPEG end marker (EOI = 0xFFD9) after the start
       const eoi = buffer.indexOf(Buffer.from([0xff, 0xd9]), soi + 2);
-      if (eoi === -1) break; // End not yet received, wait for more data
+      if (eoi === -1) break;
 
-      // Extract the complete picture and remove it from the buffer
-      const frame = buffer.subarray(soi, eoi + 2);
+      // Keep overwriting - we only want the most recent complete frame
+      latestFrame = buffer.subarray(soi, eoi + 2);
       buffer = buffer.subarray(eoi + 2);
+    }
 
-      // Send the complete picture to the browser
-      res.write(
-        `--${boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: ${frame.length}\r\n\r\n`
-      );
-      res.write(frame);
+    // Send only the latest frame, skip if previous send is still in progress
+    if (latestFrame && !sending) {
+      sending = true;
+      const header = `--${boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: ${latestFrame.length}\r\n\r\n`;
+      res.write(header);
+      res.write(latestFrame, () => {
+        sending = false;
+      });
     }
   });
 
