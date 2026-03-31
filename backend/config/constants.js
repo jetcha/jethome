@@ -30,6 +30,7 @@ export const DATABASE_PATH = "climate_history.db";
 export const CAMERA_HOST = "192.168.1.87";
 export const CAMERA_PORT = 8080;
 export const CAMERA_STREAM_URL = `http://${CAMERA_HOST}:${CAMERA_PORT}/video`;
+export const CAMERA_AUDIO_URL = `http://${CAMERA_HOST}:${CAMERA_PORT}/audio.wav`;
 export const RECORDINGS_DIR = "/var/jethome/recordings";
 export const SEGMENT_DURATION_SECONDS = 1200; // 20 minutes
 export const RETENTION_HOURS = 48;
