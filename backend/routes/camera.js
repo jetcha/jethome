@@ -79,6 +79,10 @@ router.get("/cam/pi3/video", (req, res) => {
   const boundary = "frame";
 
   const ffmpeg = spawn("ffmpeg", [
+    "-fflags", "nobuffer",       // Don't buffer input
+    "-flags", "low_delay",       // Low latency decoding
+    "-probesize", "32",          // Minimal probing (faster startup)
+    "-analyzeduration", "0",     // Skip input analysis delay
     "-rtsp_transport", "tcp",
     "-i", PI3_RTSP_URL,
     "-f", "mjpeg",
