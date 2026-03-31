@@ -69,8 +69,14 @@ router.get("/cam/pixel6/video", (req, res) => {
 });
 
 // Pi3 live stream proxy (RTSP -> MJPEG via FFmpeg)
+// FFmpeg converts the Pi3's H.264 RTSP stream into JPEG pictures,
+// but sends them through the pipe in random-sized chunks.
+// We collect chunks into a buffer and look for JPEG start/end markers
+// (FFD8 = start, FFD9 = end) to extract complete pictures before sending.
 router.get("/cam/pi3/video", (req, res) => {
   if (!authenticateAdmin(req, res)) return;
+
+  const boundary = "frame";
 
   const ffmpeg = spawn("ffmpeg", [
     "-rtsp_transport", "tcp",
@@ -83,16 +89,37 @@ router.get("/cam/pi3/video", (req, res) => {
   ]);
 
   res.writeHead(200, {
-    "Content-Type": "multipart/x-mixed-replace; boundary=ffmpeg",
+    "Content-Type": `multipart/x-mixed-replace; boundary=${boundary}`,
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
   });
 
+  // Buffer to collect incoming data chunks until we have a full JPEG
+  let buffer = Buffer.alloc(0);
+
   ffmpeg.stdout.on("data", (chunk) => {
-    res.write(
-      `--ffmpeg\r\nContent-Type: image/jpeg\r\nContent-Length: ${chunk.length}\r\n\r\n`
-    );
-    res.write(chunk);
+    buffer = Buffer.concat([buffer, chunk]);
+
+    // Keep extracting complete JPEG frames from the buffer
+    while (true) {
+      // Find JPEG start marker (SOI = 0xFFD8)
+      const soi = buffer.indexOf(Buffer.from([0xff, 0xd8]));
+      if (soi === -1) break;
+
+      // Find JPEG end marker (EOI = 0xFFD9) after the start
+      const eoi = buffer.indexOf(Buffer.from([0xff, 0xd9]), soi + 2);
+      if (eoi === -1) break; // End not yet received, wait for more data
+
+      // Extract the complete picture and remove it from the buffer
+      const frame = buffer.subarray(soi, eoi + 2);
+      buffer = buffer.subarray(eoi + 2);
+
+      // Send the complete picture to the browser
+      res.write(
+        `--${boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: ${frame.length}\r\n\r\n`
+      );
+      res.write(frame);
+    }
   });
 
   ffmpeg.stderr.on("data", (data) => {
