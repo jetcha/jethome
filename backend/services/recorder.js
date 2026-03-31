@@ -56,7 +56,6 @@ const cameras = {
         "-segment_format", "mp4",
         "-reset_timestamps", "1",
         "-strftime", "1",
-        "-movflags", "+faststart",
         outputPattern,
       ];
     },
