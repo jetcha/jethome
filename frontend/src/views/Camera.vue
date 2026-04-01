@@ -10,22 +10,28 @@
       </div>
       <div class="content">
         <div class="camera-feed">
+          <div v-if="pixel6StreamUrl && !pixel6Loaded" class="loading-spinner"></div>
           <img
             v-if="pixel6StreamUrl"
+            v-show="pixel6Loaded"
             :src="pixel6StreamUrl"
             alt="Live Camera Feed"
             class="camera-stream"
+            @load="pixel6Loaded = true"
           />
-          <div v-else class="camera-offline">Camera Unavailable</div>
+          <div v-if="!pixel6StreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
         <div class="camera-feed">
+          <div v-if="pi3StreamUrl && !pi3Loaded" class="loading-spinner"></div>
           <img
             v-if="pi3StreamUrl"
+            v-show="pi3Loaded"
             :src="pi3StreamUrl"
             alt="Live Camera Feed"
             class="camera-stream"
+            @load="pi3Loaded = true"
           />
-          <div v-else class="camera-offline">Camera Unavailable</div>
+          <div v-if="!pi3StreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
         <div class="card-parent">
           <div class="card-header">
@@ -63,6 +69,8 @@ import { getRecording, setRecording, getStreamUrl } from "../api.js";
 const router = useRouter();
 const pixel6StreamUrl = ref(null);
 const pi3StreamUrl = ref(null);
+const pixel6Loaded = ref(false);
+const pi3Loaded = ref(false);
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
 
@@ -118,6 +126,7 @@ onBeforeUnmount(() => {
 .camera-feed {
   overflow: hidden;
   margin: 0 auto;
+  aspect-ratio: 4 / 3;
 }
 
 .camera-stream {

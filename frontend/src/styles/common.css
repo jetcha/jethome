@@ -135,3 +135,27 @@
   width: 33.83%;
   left: -0.8%;
 }
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.loading-spinner::after {
+  content: "";
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #e0e0e0;
+  border-top-color: #1c1c1c;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

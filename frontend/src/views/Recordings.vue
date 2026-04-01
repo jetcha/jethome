@@ -43,7 +43,7 @@
 
         <!-- Recordings List -->
         <template v-else>
-          <div v-if="loading" class="recordings-empty">Loading...</div>
+          <div v-if="loading" class="loading-spinner"></div>
           <div v-else-if="segments.length === 0" class="recordings-empty">
             No recordings available
           </div>
