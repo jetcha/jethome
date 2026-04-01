@@ -30,7 +30,8 @@ setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);
 
 // Graceful shutdown
 function shutdown() {
-  stopRecording();
+  stopRecording("pixel6");
+  stopRecording("pi3");
   process.exit();
 }
 process.on("SIGTERM", shutdown);

@@ -7,6 +7,7 @@
           type="password"
           inputmode="numeric"
           placeholder="CODE"
+          autocomplete="current-password"
           :disabled="loading"
           autofocus
         />
