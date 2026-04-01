@@ -55,7 +55,7 @@
               @click="selectSegment(seg)"
             >
               <span class="segment-time">
-                {{ formatRow(seg.timestamp) }}
+                {{ formatTimestamp(seg.timestamp) }}
               </span>
               <span class="segment-size">{{ formatSize(seg.size) }}</span>
             </div>
@@ -145,16 +145,6 @@ function playNext() {
 }
 
 function formatTimestamp(ts) {
-  return new Date(ts).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
-
-function formatRow(ts) {
   return new Date(ts).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
