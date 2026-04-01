@@ -31,8 +31,7 @@
 
 // MQTT Topics - Publish
 #define MQTT_TOPIC_CLIMATE "jethome/frontdoor/climate"
-#define MQTT_TOPIC_DOOR_STATE "jethome/door/state"
-#define MQTT_TOPIC_WINDOW_STATE "jethome/window/state"
+#define MQTT_TOPIC_ALARM_TRIGGERED "jethome/alarm/triggered"
 
 // =============================================================================
 // Pin Definitions

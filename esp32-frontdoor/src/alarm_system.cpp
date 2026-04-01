@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "mqtt_manager.h"
 
 void initAlarmSystem() {
     pinMode(RELAY_SIREN_PIN, OUTPUT);
@@ -11,6 +12,7 @@ void initAlarmSystem() {
 
 void updateAlarmSystem(State& state) {
     bool isBreachDetected = state.isDoorOpen || state.isWindowOpen;
+    bool wasSirenActive = state.isSirenActive;
 
     // If alarm system is turned off, immediately stop siren
     if (!state.isAlarmEnabled) {
@@ -22,6 +24,12 @@ void updateAlarmSystem(State& state) {
     if (state.isAlarmEnabled && isBreachDetected) {
         state.isSirenActive = true;
         state.isSirenCountdownStarted = false;
+    }
+
+    // Notify backend when alarm first triggers
+    if (!wasSirenActive && state.isSirenActive) {
+        if (state.isDoorOpen) publishMessageMQTT(MQTT_TOPIC_ALARM_TRIGGERED, "door");
+        if (state.isWindowOpen) publishMessageMQTT(MQTT_TOPIC_ALARM_TRIGGERED, "window");
     }
 
     // Start countdown when breach is closed but siren is still active

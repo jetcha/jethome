@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 #include "config.h"
-#include "mqtt_manager.h"
 
 static bool isFirstUpdate = true;
 
@@ -19,12 +18,10 @@ void updateMagnetSensorStatus(State& state) {
 
     if (newDoorState != state.isDoorOpen || isFirstUpdate) {
         state.isDoorOpen = newDoorState;
-        publishMessageMQTT(MQTT_TOPIC_DOOR_STATE, state.isDoorOpen ? "1" : "0");
     }
 
     if (newWindowState != state.isWindowOpen || isFirstUpdate) {
         state.isWindowOpen = newWindowState;
-        publishMessageMQTT(MQTT_TOPIC_WINDOW_STATE, state.isWindowOpen ? "1" : "0");
     }
 
     isFirstUpdate = false;

@@ -10,10 +10,6 @@ class StateManager {
     alarmScheduleOn: null, // "HH:MM" string
     alarmScheduleOff: null, // "HH:MM" string
 
-    // Sensors
-    isDoorOpened: false,
-    isWindowOpened: false,
-
     // Climate data
     temperatureIndoor: null,
     humidityIndoor: null,
@@ -33,7 +29,6 @@ class StateManager {
   // Non-primitive state (Maps and Sets)
   #validTokens = new Map();
   #pushSubscriptions = new Set();
-  #listeners = new Map();
 
   // ============= Alarm System =============
 
@@ -42,11 +37,7 @@ class StateManager {
   }
 
   set alarmState(value) {
-    const oldValue = this.#state.alarmState;
     this.#state.alarmState = Boolean(value);
-    if (oldValue !== this.#state.alarmState) {
-      this.#emit("alarmStateChange", this.#state.alarmState);
-    }
   }
 
   get alarmMode() {
@@ -56,11 +47,7 @@ class StateManager {
   set alarmMode(value) {
     const valid = ["on", "schedule", "off"];
     if (!valid.includes(value)) return;
-    const old = this.#state.alarmMode;
     this.#state.alarmMode = value;
-    if (old !== value) {
-      this.#emit("alarmModeChange", value);
-    }
   }
 
   get alarmScheduleOn() {
@@ -77,36 +64,6 @@ class StateManager {
 
   set alarmScheduleOff(value) {
     this.#state.alarmScheduleOff = value;
-  }
-
-  // ============= Sensor States =============
-
-  get isDoorOpened() {
-    return this.#state.isDoorOpened;
-  }
-
-  set isDoorOpened(value) {
-    const wasOpened = this.#state.isDoorOpened;
-    this.#state.isDoorOpened = Boolean(value);
-
-    // Emit event when door opens (was closed, now open)
-    if (!wasOpened && this.#state.isDoorOpened) {
-      this.#emit("doorOpened");
-    }
-  }
-
-  get isWindowOpened() {
-    return this.#state.isWindowOpened;
-  }
-
-  set isWindowOpened(value) {
-    const wasOpened = this.#state.isWindowOpened;
-    this.#state.isWindowOpened = Boolean(value);
-
-    // Emit event when window opens (was closed, now open)
-    if (!wasOpened && this.#state.isWindowOpened) {
-      this.#emit("windowOpened");
-    }
   }
 
   // ============= Climate Data =============
@@ -129,7 +86,6 @@ class StateManager {
   set indoorClimate({ temperature, humidity }) {
     this.#state.temperatureIndoor = temperature;
     this.#state.humidityIndoor = humidity;
-    this.#emit("indoorClimateUpdate", { temperature, humidity });
   }
 
   get temperatureOutdoor() {
@@ -150,7 +106,6 @@ class StateManager {
   set outdoorClimate({ temperature, humidity }) {
     this.#state.temperatureOutdoor = temperature;
     this.#state.humidityOutdoor = humidity;
-    this.#emit("outdoorClimateUpdate", { temperature, humidity });
   }
 
   // ============= Climate Save Timestamps =============
@@ -227,37 +182,6 @@ class StateManager {
     return this.#pushSubscriptions.delete(subscription);
   }
 
-  // ============= Event System =============
-
-  on(event, callback) {
-    if (!this.#listeners.has(event)) {
-      this.#listeners.set(event, []);
-    }
-    this.#listeners.get(event).push(callback);
-  }
-
-  off(event, callback) {
-    if (!this.#listeners.has(event)) return;
-    const callbacks = this.#listeners.get(event);
-    const index = callbacks.indexOf(callback);
-    if (index > -1) {
-      callbacks.splice(index, 1);
-    }
-  }
-
-  #emit(event, data) {
-    const callbacks = this.#listeners.get(event);
-    if (callbacks) {
-      callbacks.forEach((cb) => {
-        try {
-          cb(data);
-        } catch (err) {
-          console.error(`Error in event listener for ${event}:`, err);
-        }
-      });
-    }
-  }
-
   // ============= Utilities =============
 
   getSnapshot() {
@@ -275,8 +199,7 @@ class StateManager {
       alarmMode: "off",
       alarmScheduleOn: null,
       alarmScheduleOff: null,
-      isDoorOpened: false,
-      isWindowOpened: false,
+
       temperatureIndoor: null,
       humidityIndoor: null,
       temperatureOutdoor: null,

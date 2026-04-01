@@ -96,28 +96,9 @@ async function handleMqttMessage(topic, message) {
       }
       break;
     }
-    case "jethome/door/state": {
-      const wasDoorOpened = stateManager.isDoorOpened;
-      stateManager.isDoorOpened = value === "1";
-      if (
-        !wasDoorOpened &&
-        stateManager.isDoorOpened &&
-        stateManager.alarmState
-      ) {
-        sendPushNotification("Jet Home", "⚠️ Front Door Opened ⚠️");
-      }
-      break;
-    }
-    case "jethome/window/state": {
-      const wasWindowOpened = stateManager.isWindowOpened;
-      stateManager.isWindowOpened = value === "1";
-      if (
-        !wasWindowOpened &&
-        stateManager.isWindowOpened &&
-        stateManager.alarmState
-      ) {
-        sendPushNotification("Jet Home", "⚠️ Window Opened ⚠️");
-      }
+    case "jethome/alarm/triggered": {
+      const source = value === "door" ? "Front Door" : "Window";
+      sendPushNotification("Jet Home", `⚠️ ${source} Opened ⚠️`);
       break;
     }
     default: {

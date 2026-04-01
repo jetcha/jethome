@@ -5,7 +5,7 @@ import { initMqtt, syncDarknessState } from "./services/mqtt.js";
 import { stopRecording } from "./services/recorder.js";
 import authRoutes from "./routes/auth.js";
 import alarmRoutes from "./routes/alarm.js";
-import sensorsRoutes from "./routes/sensors.js";
+
 import climateRoutes from "./routes/climate.js";
 import cameraRoutes from "./routes/camera.js";
 import pushRoutes from "./routes/push.js";
@@ -19,7 +19,7 @@ app.use(express.json());
 // Routes
 app.use("/api", authRoutes);
 app.use("/api", alarmRoutes);
-app.use("/api", sensorsRoutes);
+
 app.use("/api", climateRoutes);
 app.use("/api", cameraRoutes);
 app.use("/api", pushRoutes);
