@@ -170,20 +170,17 @@ export function getSegments(camId) {
 
   const files = fs.readdirSync(dir).filter((f) => FILENAME_PATTERN.test(f));
 
+  const now = Date.now();
+
   const segments = files.map((filename) => {
     const filePath = path.join(dir, filename);
     const stat = fs.statSync(filePath);
     const timestamp = parseTimestamp(filename);
-    return { filename, timestamp, size: stat.size };
+    return { filename, timestamp, size: stat.size, mtime: stat.mtimeMs };
   });
 
-  const now = Date.now();
   return segments
-    .filter((s) => {
-      const filePath = path.join(dir, s.filename);
-      const mtime = fs.statSync(filePath).mtimeMs;
-      return now - mtime > 30000;
-    })
+    .filter((s) => now - s.mtime > 30000)
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
