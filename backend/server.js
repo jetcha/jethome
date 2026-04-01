@@ -8,6 +8,7 @@ import alarmRoutes from "./routes/alarm.js";
 import sensorsRoutes from "./routes/sensors.js";
 import climateRoutes from "./routes/climate.js";
 import cameraRoutes from "./routes/camera.js";
+import pushRoutes from "./routes/push.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api", alarmRoutes);
 app.use("/api", sensorsRoutes);
 app.use("/api", climateRoutes);
 app.use("/api", cameraRoutes);
+app.use("/api", pushRoutes);
 
 // Initialize MQTT
 initMqtt();

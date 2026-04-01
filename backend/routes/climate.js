@@ -6,8 +6,6 @@ import {
   getClimateHistoryByRange,
 } from "../services/database.js";
 import { fetchSunTimes, isDark, getSunTimes } from "../services/sunTimes.js";
-import { VAPID_PUBLIC } from "../config/constants.js";
-import { addSubscription } from "../services/push.js";
 
 const router = express.Router();
 
@@ -38,15 +36,6 @@ router.get("/isDark", requireAuth, async (req, res) => {
     sunrise: sunrise?.toISOString(),
     sunset: sunset?.toISOString(),
   });
-});
-
-router.get("/vapidPublicKey", (req, res) => {
-  res.json({ key: VAPID_PUBLIC });
-});
-
-router.post("/push/subscribe", requireAuth, (req, res) => {
-  addSubscription(req.body);
-  res.json({ success: true });
 });
 
 export default router;
