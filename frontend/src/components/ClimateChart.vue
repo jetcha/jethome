@@ -133,10 +133,23 @@ function updateChart() {
     return;
   }
 
-  // Recreate chart when time range changes so axis adapts
-  chart.destroy();
-  chart = null;
-  createChart();
+  const newTimeConfig = getTimeUnit(props.data);
+  const currentUnit = chart.options.scales.x.time.unit;
+
+  // Recreate chart only when time scale changes so axis adapts
+  if (newTimeConfig.unit !== currentUnit) {
+    chart.destroy();
+    chart = null;
+    createChart();
+    return;
+  }
+
+  // Otherwise just update data in-place
+  chart.data.datasets[0].data = props.data.map((d) => ({
+    x: new Date(d.timestamp + "Z"),
+    y: d[props.dataKey],
+  }));
+  chart.update();
 }
 
 watch(() => props.data, updateChart, { deep: true });
