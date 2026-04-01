@@ -14,10 +14,10 @@
           <img
             v-if="pixel6StreamUrl"
             v-show="pixel6Loaded"
+            ref="pixel6Img"
             :src="pixel6StreamUrl"
             alt="Live Camera Feed"
             class="camera-stream"
-            @load="pixel6Loaded = true"
           />
           <div v-if="!pixel6StreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
@@ -26,10 +26,10 @@
           <img
             v-if="pi3StreamUrl"
             v-show="pi3Loaded"
+            ref="pi3Img"
             :src="pi3StreamUrl"
             alt="Live Camera Feed"
             class="camera-stream"
-            @load="pi3Loaded = true"
           />
           <div v-if="!pi3StreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
@@ -71,8 +71,11 @@ const pixel6StreamUrl = ref(null);
 const pi3StreamUrl = ref(null);
 const pixel6Loaded = ref(false);
 const pi3Loaded = ref(false);
+const pixel6Img = ref(null);
+const pi3Img = ref(null);
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
+let loadCheckInterval = null;
 
 function goBack() {
   router.push("/dashboard");
@@ -114,9 +117,21 @@ onMounted(() => {
   pixel6StreamUrl.value = getStreamUrl("pixel6");
   pi3StreamUrl.value = getStreamUrl("pi3");
   fetchRecording();
+  loadCheckInterval = setInterval(() => {
+    if (!pixel6Loaded.value && pixel6Img.value && pixel6Img.value.naturalWidth > 0) {
+      pixel6Loaded.value = true;
+    }
+    if (!pi3Loaded.value && pi3Img.value && pi3Img.value.naturalWidth > 0) {
+      pi3Loaded.value = true;
+    }
+    if (pixel6Loaded.value && pi3Loaded.value) {
+      clearInterval(loadCheckInterval);
+    }
+  }, 200);
 });
 
 onBeforeUnmount(() => {
+  clearInterval(loadCheckInterval);
   pixel6StreamUrl.value = null;
   pi3StreamUrl.value = null;
 });
@@ -127,6 +142,12 @@ onBeforeUnmount(() => {
   overflow: hidden;
   margin: 0 auto;
   aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+.camera-feed .loading-spinner {
+  height: 100%;
+  padding: 0;
 }
 
 .camera-stream {
