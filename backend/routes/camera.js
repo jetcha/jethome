@@ -4,6 +4,7 @@ import { spawn } from "child_process";
 import path from "path";
 import { stateManager } from "../services/StateManager.js";
 import {
+  getRecordingsPath,
   getSegments,
   isRecording,
   startRecording,
@@ -13,7 +14,6 @@ import {
   PIXEL6_HOST,
   PIXEL6_PORT,
   PI3_RTSP_URL,
-  RECORDINGS_BASE_DIR,
   VALID_CAMS,
   FILENAME_PATTERN,
 } from "../config/constants.js";
@@ -191,8 +191,7 @@ router.get("/cam/:camId/recordings/:filename", (req, res) => {
     return res.status(400).json({ error: "Invalid filename" });
   }
 
-  const dirName = camId === "pixel6" ? "pixel6_recordings" : "pi3_recordings";
-  const filePath = path.resolve(RECORDINGS_BASE_DIR, dirName, filename);
+  const filePath = path.join(getRecordingsPath(camId), filename);
   res.sendFile(filePath);
 });
 

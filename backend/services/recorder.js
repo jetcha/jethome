@@ -83,7 +83,7 @@ const cameras = {
   },
 };
 
-function getRecordingsPath(camId) {
+export function getRecordingsPath(camId) {
   return path.resolve(RECORDINGS_BASE_DIR, cameras[camId].dir);
 }
 
