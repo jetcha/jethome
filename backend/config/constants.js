@@ -35,6 +35,10 @@ export const PIXEL6_AUDIO_URL = `http://${PIXEL6_HOST}:${PIXEL6_PORT}/audio.wav`
 // Pi 3B (Pi Camera v2.1 via mediamtx RTSP)
 export const PI3_RTSP_URL = "rtsp://192.168.1.89:8554/pi3cam";
 
+// Camera
+export const VALID_CAMS = ["pixel6", "pi3"];
+export const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
+
 // Recording
 export const RECORDINGS_BASE_DIR = "/mnt/pi4cloud";
 export const SEGMENT_DURATION_SECONDS = 1200; // 20 minutes

@@ -14,12 +14,11 @@ import {
   PIXEL6_PORT,
   PI3_RTSP_URL,
   RECORDINGS_BASE_DIR,
+  VALID_CAMS,
+  FILENAME_PATTERN,
 } from "../config/constants.js";
 
 const router = express.Router();
-
-const VALID_CAMS = ["pixel6", "pi3"];
-const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
 
 function authenticateAdmin(req, res) {
   const token =

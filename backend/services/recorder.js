@@ -9,9 +9,8 @@ import {
   SEGMENT_DURATION_SECONDS,
   RETENTION_HOURS,
   RETENTION_CLEANUP_INTERVAL_MS,
+  FILENAME_PATTERN,
 } from "../config/constants.js";
-
-const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
 
 const cameras = {
   pixel6: {
