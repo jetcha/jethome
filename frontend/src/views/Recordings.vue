@@ -10,20 +10,22 @@
           }}
         </h1>
         <div class="header-actions">
-          <button
-            class="header-btn"
-            :class="{ active: activeCam === 'pixel6' }"
-            @click="setCam('pixel6')"
-          >
-            PIXEL6
-          </button>
-          <button
-            class="header-btn"
-            :class="{ active: activeCam === 'pi3' }"
-            @click="setCam('pi3')"
-          >
-            PI3
-          </button>
+          <template v-if="!selectedSegment">
+            <button
+              class="header-btn"
+              :class="{ active: activeCam === 'pixel6' }"
+              @click="setCam('pixel6')"
+            >
+              PIXEL6
+            </button>
+            <button
+              class="header-btn"
+              :class="{ active: activeCam === 'pi3' }"
+              @click="setCam('pi3')"
+            >
+              PI3
+            </button>
+          </template>
           <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
