@@ -9,13 +9,11 @@ void setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
 
-    // Initialize all modules
-    initClimateSensor();
-
-    // Network setup
-    initWifi();
-    initOTA();
-    initMQTT();
+    initClimateSensor(I2C_SDA_PIN, I2C_SCL_PIN, CLIMATE_DATA_READ_INTERVAL_MS,
+                      MQTT_TOPIC_CLIMATE, publishMessageMQTT);
+    initWifi(WIFI_SSID, WIFI_PASS, WIFI_RECONNECTION_DELAY_MS);
+    initOTA(OTA_HOSTNAME, OTA_PASSWORD);
+    initMQTT(MQTT_SERVER, MQTT_PORT, MQTT_CLIENT_ID);
 }
 
 void loop()

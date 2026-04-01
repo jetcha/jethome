@@ -3,15 +3,20 @@
 #include <Adafruit_SHTC3.h>
 #include <Wire.h>
 
-#include "config.h"
-#include "mqtt_manager.h"
-
 static Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
 static unsigned long lastUpdateTimestampMs = 0;
 static bool isSensorInitialized = false;
+static unsigned long readIntervalMs = 0;
+static const char* topic = nullptr;
+static MqttPublishFunc publish = nullptr;
 
-void initClimateSensor() {
-    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+void initClimateSensor(int sdaPin, int sclPin, unsigned long intervalMs,
+                       const char* mqttTopic, MqttPublishFunc publishFunc) {
+    readIntervalMs = intervalMs;
+    topic = mqttTopic;
+    publish = publishFunc;
+
+    Wire.begin(sdaPin, sclPin);
     if (shtc3.begin()) {
         isSensorInitialized = true;
     }
@@ -22,7 +27,7 @@ void updateClimateData() {
         return;
     }
 
-    if (millis() - lastUpdateTimestampMs < CLIMATE_DATA_READ_INTERVAL_MS) {
+    if (millis() - lastUpdateTimestampMs < readIntervalMs) {
         return;
     }
     lastUpdateTimestampMs = millis();
@@ -37,5 +42,5 @@ void updateClimateData() {
     char payload[64];
     snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"humidity\":%.1f}",
              temperature.temperature, humidity.relative_humidity);
-    publishMessageMQTT(MQTT_TOPIC_CLIMATE, payload);
+    publish(topic, payload);
 }
