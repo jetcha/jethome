@@ -178,7 +178,7 @@ const humidityOutdoor = ref(null);
 const sunrise = ref(null);
 const sunset = ref(null);
 
-let tempInterval = null;
+let pollInterval = null;
 
 async function fetchAlarm() {
   try {
@@ -351,18 +351,18 @@ onMounted(() => {
   fetchClimateOutdoor();
   fetchSunTimes();
 
-  tempInterval = setInterval(() => {
+  pollInterval = setInterval(() => {
     fetchClimateIndoor();
     fetchClimateOutdoor();
     fetchAlarm();
-  }, 1000);
+  }, 10000);
 
   document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
 onUnmounted(() => {
-  if (tempInterval) {
-    clearInterval(tempInterval);
+  if (pollInterval) {
+    clearInterval(pollInterval);
   }
   document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
