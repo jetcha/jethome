@@ -10,6 +10,7 @@ frontend/dev-dist/
 # IDE
 .vscode/
 *.code-workspace
+.claude/
 
 # Build output
 dist/
