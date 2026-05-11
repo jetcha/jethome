@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 .camera-feed {
   overflow: hidden;
   margin: 0 auto;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 7 / 4;
   width: 100%;
 }
 
@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
   padding: 3rem;
   text-align: center;
   color: #999;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 7 / 4;
   display: flex;
   align-items: center;
   justify-content: center;

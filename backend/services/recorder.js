@@ -2,8 +2,8 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import {
-  LIVING_ROOM_CAM_RTSP_URL,
-  BEDROOM_CAM_RTSP_URL,
+  LIVING_ROOM_CAM_RTSP_URL_MAIN,
+  BEDROOM_CAM_RTSP_URL_MAIN,
   RECORDINGS_BASE_DIR,
   SEGMENT_DURATION_SECONDS,
   RETENTION_HOURS,
@@ -34,7 +34,7 @@ const cameras = {
     recording: false,
     dir: "living_room_cam_recordings",
     getArgs(outputPattern) {
-      return buildReolinkArgs(LIVING_ROOM_CAM_RTSP_URL, outputPattern);
+      return buildReolinkArgs(LIVING_ROOM_CAM_RTSP_URL_MAIN, outputPattern);
     },
   },
   bedroom_cam: {
@@ -44,7 +44,7 @@ const cameras = {
     recording: false,
     dir: "bedroom_cam_recordings",
     getArgs(outputPattern) {
-      return buildReolinkArgs(BEDROOM_CAM_RTSP_URL, outputPattern);
+      return buildReolinkArgs(BEDROOM_CAM_RTSP_URL_MAIN, outputPattern);
     },
   },
 };

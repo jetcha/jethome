@@ -10,15 +10,16 @@ import {
   stopRecording,
 } from "../services/recorder.js";
 import {
-  LIVING_ROOM_CAM_RTSP_URL,
-  BEDROOM_CAM_RTSP_URL,
+  LIVING_ROOM_CAM_RTSP_URL_SUB,
+  BEDROOM_CAM_RTSP_URL_SUB,
   VALID_CAMS,
   FILENAME_PATTERN,
 } from "../config/constants.js";
 
+// Live feed uses the sub-stream (low-res, low-bandwidth). Recordings use main (see recorder.js).
 const RTSP_URLS = {
-  living_room_cam: LIVING_ROOM_CAM_RTSP_URL,
-  bedroom_cam: BEDROOM_CAM_RTSP_URL,
+  living_room_cam: LIVING_ROOM_CAM_RTSP_URL_SUB,
+  bedroom_cam: BEDROOM_CAM_RTSP_URL_SUB,
 };
 
 const router = express.Router();
@@ -62,7 +63,7 @@ router.get("/cam/:camId/video", (req, res) => {
     "-analyzeduration", "0",     // Skip input analysis delay
     "-rtsp_transport", "tcp",
     "-i", rtspUrl,
-    "-vf", "scale=640:480,drawtext=text='%{localtime}':x=10:y=10:fontsize=12:fontcolor=white:box=1:boxcolor=black@0.4",
+    "-vf", "scale=640:-2",
     "-f", "mjpeg",
     "-q:v", "8",                 // Lower quality = smaller JPEGs = faster transfer
     "-r", "10",                  // 10fps is enough for a preview
