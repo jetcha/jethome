@@ -155,6 +155,6 @@ h2 {
 }
 
 .spacer {
-  height: 0.8rem;
+  height: 0.5rem;
 }
 </style>

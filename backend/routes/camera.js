@@ -5,9 +5,6 @@ import { stateManager } from "../services/StateManager.js";
 import {
   getRecordingsPath,
   getSegments,
-  isRecording,
-  startRecording,
-  stopRecording,
 } from "../services/recorder.js";
 import {
   LIVING_ROOM_CAM_RTSP_URL_SUB,
@@ -125,29 +122,6 @@ router.get("/cam/:camId/video", (req, res) => {
   req.on("close", () => {
     ffmpeg.kill("SIGINT");
   });
-});
-
-// Get recording state
-router.get("/cam/:camId/recording", (req, res) => {
-  if (!authenticateAdmin(req, res)) return;
-  const { camId } = req.params;
-  if (!VALID_CAMS.includes(camId)) return res.status(400).json({ error: "Invalid camera" });
-  res.json({ enabled: isRecording(camId) });
-});
-
-// Set recording state
-router.post("/cam/:camId/recording", (req, res) => {
-  if (!authenticateAdmin(req, res)) return;
-  const { camId } = req.params;
-  if (!VALID_CAMS.includes(camId)) return res.status(400).json({ error: "Invalid camera" });
-
-  const { enabled } = req.body;
-  if (enabled) {
-    startRecording(camId);
-  } else {
-    stopRecording(camId);
-  }
-  res.json({ enabled: isRecording(camId) });
 });
 
 // List recordings

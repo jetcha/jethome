@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { PORT, SUN_TIME_UPDATE_INTERVAL_MS } from "./config/constants.js";
 import { initMqtt, syncDarknessState } from "./services/mqtt.js";
-import { stopRecording } from "./services/recorder.js";
+import { startRecording, stopRecording } from "./services/recorder.js";
 import authRoutes from "./routes/auth.js";
 import alarmRoutes from "./routes/alarm.js";
 
@@ -26,6 +26,10 @@ app.use("/api", pushRoutes);
 
 // Initialize MQTT
 initMqtt();
+
+// Always-on recording
+startRecording("living_room_cam");
+startRecording("bedroom_cam");
 
 // Sync darkness state every minute
 setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);

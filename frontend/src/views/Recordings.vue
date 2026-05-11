@@ -16,14 +16,14 @@
               :class="{ active: activeCam === 'living_room_cam' }"
               @click="setCam('living_room_cam')"
             >
-              LIVING
+              LIV
             </button>
             <button
               class="header-btn"
               :class="{ active: activeCam === 'bedroom_cam' }"
               @click="setCam('bedroom_cam')"
             >
-              BEDROOM
+              BED
             </button>
           </template>
           <button class="header-btn" @click="handleBack">BACK</button>

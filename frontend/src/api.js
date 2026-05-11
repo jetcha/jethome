@@ -109,17 +109,6 @@ export async function getClimateHistoryByRange(location, from, to) {
   );
 }
 
-export async function getRecording(camId) {
-  return api(`/api/cam/${camId}/recording`);
-}
-
-export async function setRecording(camId, enabled) {
-  return api(`/api/cam/${camId}/recording`, {
-    method: "POST",
-    body: JSON.stringify({ enabled }),
-  });
-}
-
 export async function getRecordings(camId) {
   return api(`/api/cam/${camId}/recordings`);
 }

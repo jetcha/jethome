@@ -53,10 +53,6 @@ export function getRecordingsPath(camId) {
   return path.resolve(RECORDINGS_BASE_DIR, cameras[camId].dir);
 }
 
-export function isRecording(camId) {
-  return cameras[camId]?.recording ?? false;
-}
-
 export function startRecording(camId) {
   const cam = cameras[camId];
   if (!cam) return;

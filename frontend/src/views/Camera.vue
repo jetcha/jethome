@@ -33,29 +33,6 @@
           />
           <div v-if="!bedroomStreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
-        <div class="card-parent">
-          <div class="card-header">
-            <span>Recording</span>
-          </div>
-          <div class="toggle-switch">
-            <div
-              class="toggle-slider"
-              :class="{ active: recordingEnabled }"
-            ></div>
-            <span
-              class="toggle-option"
-              :class="{ selected: recordingEnabled }"
-              @click="setRecordingState(true)"
-              >ON</span
-            >
-            <span
-              class="toggle-option"
-              :class="{ selected: !recordingEnabled }"
-              @click="setRecordingState(false)"
-              >OFF</span
-            >
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -64,7 +41,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { getRecording, setRecording, getStreamUrl } from "../api.js";
+import { getStreamUrl } from "../api.js";
 
 const router = useRouter();
 const livingRoomStreamUrl = ref(null);
@@ -73,8 +50,6 @@ const livingRoomLoaded = ref(false);
 const bedroomLoaded = ref(false);
 const livingRoomImg = ref(null);
 const bedroomImg = ref(null);
-const recordingEnabled = ref(false);
-const recordingLoading = ref(false);
 let loadCheckInterval = null;
 
 function goBack() {
@@ -85,38 +60,9 @@ function goToRecordings() {
   router.push("/recordings");
 }
 
-async function fetchRecording() {
-  try {
-    const [livingRoom, bedroom] = await Promise.all([
-      getRecording("living_room_cam"),
-      getRecording("bedroom_cam"),
-    ]);
-    recordingEnabled.value = livingRoom.enabled || bedroom.enabled;
-  } catch (e) {
-    console.error("Failed to fetch recording state:", e);
-  }
-}
-
-async function setRecordingState(enabled) {
-  if (recordingEnabled.value === enabled || recordingLoading.value) return;
-  recordingLoading.value = true;
-  try {
-    await Promise.all([
-      setRecording("living_room_cam", enabled),
-      setRecording("bedroom_cam", enabled),
-    ]);
-    recordingEnabled.value = enabled;
-  } catch (e) {
-    console.error("Failed to set recording:", e);
-  } finally {
-    recordingLoading.value = false;
-  }
-}
-
 onMounted(() => {
   livingRoomStreamUrl.value = getStreamUrl("living_room_cam");
   bedroomStreamUrl.value = getStreamUrl("bedroom_cam");
-  fetchRecording();
   loadCheckInterval = setInterval(() => {
     if (!livingRoomLoaded.value && livingRoomImg.value && livingRoomImg.value.naturalWidth > 0) {
       livingRoomLoaded.value = true;
