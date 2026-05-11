@@ -1,5 +1,4 @@
 import express from "express";
-import http from "http";
 import { spawn } from "child_process";
 import path from "path";
 import { stateManager } from "../services/StateManager.js";
@@ -11,12 +10,16 @@ import {
   stopRecording,
 } from "../services/recorder.js";
 import {
-  PIXEL6_HOST,
-  PIXEL6_PORT,
-  PI3_RTSP_URL,
+  LIVING_ROOM_CAM_RTSP_URL,
+  BEDROOM_CAM_RTSP_URL,
   VALID_CAMS,
   FILENAME_PATTERN,
 } from "../config/constants.js";
+
+const RTSP_URLS = {
+  living_room_cam: LIVING_ROOM_CAM_RTSP_URL,
+  bedroom_cam: BEDROOM_CAM_RTSP_URL,
+};
 
 const router = express.Router();
 
@@ -38,42 +41,17 @@ function authenticateAdmin(req, res) {
   return true;
 }
 
-// Pixel 6 live stream proxy (MJPEG native)
-router.get("/cam/pixel6/video", (req, res) => {
-  if (!authenticateAdmin(req, res)) return;
-
-  const camReq = http.get(
-    `http://${PIXEL6_HOST}:${PIXEL6_PORT}/video`,
-    (camRes) => {
-      res.writeHead(camRes.statusCode, {
-        "Content-Type":
-          camRes.headers["content-type"] || "multipart/x-mixed-replace",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      });
-      camRes.pipe(res);
-    }
-  );
-
-  camReq.on("error", (err) => {
-    console.error("Pixel6 stream error:", err);
-    if (!res.headersSent) {
-      res.status(502).json({ error: "Camera unavailable" });
-    }
-  });
-
-  req.on("close", () => {
-    camReq.destroy();
-  });
-});
-
-// Pi3 live stream proxy (RTSP -> MJPEG via FFmpeg)
-// FFmpeg converts the Pi3's H.264 RTSP stream into JPEG pictures,
+// Live stream proxy (RTSP -> MJPEG via FFmpeg)
+// FFmpeg converts the camera's H.264 RTSP stream into JPEG pictures,
 // but sends them through the pipe in random-sized chunks.
 // We collect chunks into a buffer and look for JPEG start/end markers
 // (FFD8 = start, FFD9 = end) to extract complete pictures before sending.
-router.get("/cam/pi3/video", (req, res) => {
+router.get("/cam/:camId/video", (req, res) => {
   if (!authenticateAdmin(req, res)) return;
+
+  const { camId } = req.params;
+  const rtspUrl = RTSP_URLS[camId];
+  if (!rtspUrl) return res.status(400).json({ error: "Invalid camera" });
 
   const boundary = "frame";
 
@@ -83,7 +61,7 @@ router.get("/cam/pi3/video", (req, res) => {
     "-probesize", "32",          // Minimal probing (faster startup)
     "-analyzeduration", "0",     // Skip input analysis delay
     "-rtsp_transport", "tcp",
-    "-i", PI3_RTSP_URL,
+    "-i", rtspUrl,
     "-vf", "scale=640:480,drawtext=text='%{localtime}':x=10:y=10:fontsize=12:fontcolor=white:box=1:boxcolor=black@0.4",
     "-f", "mjpeg",
     "-q:v", "8",                 // Lower quality = smaller JPEGs = faster transfer
@@ -135,7 +113,7 @@ router.get("/cam/pi3/video", (req, res) => {
   ffmpeg.stderr.on("data", (data) => {
     const msg = data.toString();
     if (msg.includes("Error") || msg.includes("error")) {
-      console.error("[Pi3 stream]", msg.trim());
+      console.error(`[${camId} stream]`, msg.trim());
     }
   });
 

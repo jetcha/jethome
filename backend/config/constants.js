@@ -26,17 +26,14 @@ export const MQTT_BROKER_URL = "mqtt://localhost:1883";
 // Database
 export const DATABASE_PATH = "climate_history.db";
 
-// Pixel 6 (IP Webcam)
-export const PIXEL6_HOST = "192.168.1.87";
-export const PIXEL6_PORT = 8080;
-export const PIXEL6_STREAM_URL = `http://${PIXEL6_HOST}:${PIXEL6_PORT}/video`;
-export const PIXEL6_AUDIO_URL = `http://${PIXEL6_HOST}:${PIXEL6_PORT}/audio.wav`;
-
-// Pi 3B (Pi Camera v2.1 via mediamtx RTSP)
-export const PI3_RTSP_URL = "rtsp://192.168.1.89:8554/pi3cam";
+// Reolink E1 Pro cameras (RTSP sub-stream: 896x512 h264 + AAC audio)
+const REOLINK_USER = "admin";
+const REOLINK_PASS = "900731doraTKC%23"; // URL-encoded: # -> %23
+export const LIVING_ROOM_CAM_RTSP_URL = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.90:554/h264Preview_01_sub`;
+export const BEDROOM_CAM_RTSP_URL = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.91:554/h264Preview_01_sub`;
 
 // Camera
-export const VALID_CAMS = ["pixel6", "pi3"];
+export const VALID_CAMS = ["living_room_cam", "bedroom_cam"];
 export const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;
 
 // Recording

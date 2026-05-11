@@ -2,9 +2,8 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import {
-  PIXEL6_STREAM_URL,
-  PIXEL6_AUDIO_URL,
-  PI3_RTSP_URL,
+  LIVING_ROOM_CAM_RTSP_URL,
+  BEDROOM_CAM_RTSP_URL,
   RECORDINGS_BASE_DIR,
   SEGMENT_DURATION_SECONDS,
   RETENTION_HOURS,
@@ -12,73 +11,40 @@ import {
   FILENAME_PATTERN,
 } from "../config/constants.js";
 
+function buildReolinkArgs(rtspUrl, outputPattern) {
+  return [
+    "-rtsp_transport", "tcp",
+    "-i", rtspUrl,
+    "-c:v", "copy",
+    "-c:a", "copy",
+    "-f", "segment",
+    "-segment_time", String(SEGMENT_DURATION_SECONDS),
+    "-segment_format", "mp4",
+    "-reset_timestamps", "1",
+    "-strftime", "1",
+    outputPattern,
+  ];
+}
+
 const cameras = {
-  pixel6: {
+  living_room_cam: {
     ffmpegProcess: null,
     cleanupInterval: null,
     restartTimeout: null,
     recording: false,
-    dir: "pixel6_recordings",
+    dir: "living_room_cam_recordings",
     getArgs(outputPattern) {
-      return [
-        "-i",
-        PIXEL6_STREAM_URL,
-        "-i",
-        PIXEL6_AUDIO_URL,
-        "-c:v",
-        "libx264",
-        "-preset",
-        "ultrafast",
-        "-crf",
-        "28",
-        "-r",
-        "24",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "96k",
-        "-f",
-        "segment",
-        "-segment_time",
-        String(SEGMENT_DURATION_SECONDS),
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-movflags",
-        "+faststart",
-        outputPattern,
-      ];
+      return buildReolinkArgs(LIVING_ROOM_CAM_RTSP_URL, outputPattern);
     },
   },
-  pi3: {
+  bedroom_cam: {
     ffmpegProcess: null,
     cleanupInterval: null,
     restartTimeout: null,
     recording: false,
-    dir: "pi3_recordings",
+    dir: "bedroom_cam_recordings",
     getArgs(outputPattern) {
-      return [
-        "-rtsp_transport",
-        "tcp",
-        "-i",
-        PI3_RTSP_URL,
-        "-c:v",
-        "copy",
-        "-f",
-        "segment",
-        "-segment_time",
-        String(SEGMENT_DURATION_SECONDS),
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        outputPattern,
-      ];
+      return buildReolinkArgs(BEDROOM_CAM_RTSP_URL, outputPattern);
     },
   },
 };

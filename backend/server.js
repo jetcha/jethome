@@ -32,8 +32,8 @@ setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);
 
 // Graceful shutdown
 function shutdown() {
-  stopRecording("pixel6");
-  stopRecording("pi3");
+  stopRecording("living_room_cam");
+  stopRecording("bedroom_cam");
   process.exit();
 }
 process.on("SIGTERM", shutdown);

@@ -13,17 +13,17 @@
           <template v-if="!selectedSegment">
             <button
               class="header-btn"
-              :class="{ active: activeCam === 'pixel6' }"
-              @click="setCam('pixel6')"
+              :class="{ active: activeCam === 'living_room_cam' }"
+              @click="setCam('living_room_cam')"
             >
-              PIXEL6
+              LIVING
             </button>
             <button
               class="header-btn"
-              :class="{ active: activeCam === 'pi3' }"
-              @click="setCam('pi3')"
+              :class="{ active: activeCam === 'bedroom_cam' }"
+              @click="setCam('bedroom_cam')"
             >
-              PI3
+              BEDROOM
             </button>
           </template>
           <button class="header-btn" @click="handleBack">BACK</button>
@@ -98,7 +98,7 @@ const segments = ref([]);
 const selectedSegment = ref(null);
 const loading = ref(true);
 const page = ref(0);
-const activeCam = ref("pixel6");
+const activeCam = ref("living_room_cam");
 
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(segments.value.length / PAGE_SIZE))

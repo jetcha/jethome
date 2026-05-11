@@ -10,28 +10,28 @@
       </div>
       <div class="content">
         <div class="camera-feed">
-          <div v-if="pixel6StreamUrl && !pixel6Loaded" class="loading-spinner"></div>
+          <div v-if="livingRoomStreamUrl && !livingRoomLoaded" class="loading-spinner"></div>
           <img
-            v-if="pixel6StreamUrl"
-            v-show="pixel6Loaded"
-            ref="pixel6Img"
-            :src="pixel6StreamUrl"
-            alt="Live Camera Feed"
+            v-if="livingRoomStreamUrl"
+            v-show="livingRoomLoaded"
+            ref="livingRoomImg"
+            :src="livingRoomStreamUrl"
+            alt="Living Room Camera Feed"
             class="camera-stream"
           />
-          <div v-if="!pixel6StreamUrl" class="camera-offline">Camera Unavailable</div>
+          <div v-if="!livingRoomStreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
         <div class="camera-feed">
-          <div v-if="pi3StreamUrl && !pi3Loaded" class="loading-spinner"></div>
+          <div v-if="bedroomStreamUrl && !bedroomLoaded" class="loading-spinner"></div>
           <img
-            v-if="pi3StreamUrl"
-            v-show="pi3Loaded"
-            ref="pi3Img"
-            :src="pi3StreamUrl"
-            alt="Live Camera Feed"
+            v-if="bedroomStreamUrl"
+            v-show="bedroomLoaded"
+            ref="bedroomImg"
+            :src="bedroomStreamUrl"
+            alt="Bedroom Camera Feed"
             class="camera-stream"
           />
-          <div v-if="!pi3StreamUrl" class="camera-offline">Camera Unavailable</div>
+          <div v-if="!bedroomStreamUrl" class="camera-offline">Camera Unavailable</div>
         </div>
         <div class="card-parent">
           <div class="card-header">
@@ -67,12 +67,12 @@ import { useRouter } from "vue-router";
 import { getRecording, setRecording, getStreamUrl } from "../api.js";
 
 const router = useRouter();
-const pixel6StreamUrl = ref(null);
-const pi3StreamUrl = ref(null);
-const pixel6Loaded = ref(false);
-const pi3Loaded = ref(false);
-const pixel6Img = ref(null);
-const pi3Img = ref(null);
+const livingRoomStreamUrl = ref(null);
+const bedroomStreamUrl = ref(null);
+const livingRoomLoaded = ref(false);
+const bedroomLoaded = ref(false);
+const livingRoomImg = ref(null);
+const bedroomImg = ref(null);
 const recordingEnabled = ref(false);
 const recordingLoading = ref(false);
 let loadCheckInterval = null;
@@ -87,11 +87,11 @@ function goToRecordings() {
 
 async function fetchRecording() {
   try {
-    const [pixel6, pi3] = await Promise.all([
-      getRecording("pixel6"),
-      getRecording("pi3"),
+    const [livingRoom, bedroom] = await Promise.all([
+      getRecording("living_room_cam"),
+      getRecording("bedroom_cam"),
     ]);
-    recordingEnabled.value = pixel6.enabled || pi3.enabled;
+    recordingEnabled.value = livingRoom.enabled || bedroom.enabled;
   } catch (e) {
     console.error("Failed to fetch recording state:", e);
   }
@@ -102,8 +102,8 @@ async function setRecordingState(enabled) {
   recordingLoading.value = true;
   try {
     await Promise.all([
-      setRecording("pixel6", enabled),
-      setRecording("pi3", enabled),
+      setRecording("living_room_cam", enabled),
+      setRecording("bedroom_cam", enabled),
     ]);
     recordingEnabled.value = enabled;
   } catch (e) {
@@ -114,17 +114,17 @@ async function setRecordingState(enabled) {
 }
 
 onMounted(() => {
-  pixel6StreamUrl.value = getStreamUrl("pixel6");
-  pi3StreamUrl.value = getStreamUrl("pi3");
+  livingRoomStreamUrl.value = getStreamUrl("living_room_cam");
+  bedroomStreamUrl.value = getStreamUrl("bedroom_cam");
   fetchRecording();
   loadCheckInterval = setInterval(() => {
-    if (!pixel6Loaded.value && pixel6Img.value && pixel6Img.value.naturalWidth > 0) {
-      pixel6Loaded.value = true;
+    if (!livingRoomLoaded.value && livingRoomImg.value && livingRoomImg.value.naturalWidth > 0) {
+      livingRoomLoaded.value = true;
     }
-    if (!pi3Loaded.value && pi3Img.value && pi3Img.value.naturalWidth > 0) {
-      pi3Loaded.value = true;
+    if (!bedroomLoaded.value && bedroomImg.value && bedroomImg.value.naturalWidth > 0) {
+      bedroomLoaded.value = true;
     }
-    if (pixel6Loaded.value && pi3Loaded.value) {
+    if (livingRoomLoaded.value && bedroomLoaded.value) {
       clearInterval(loadCheckInterval);
     }
   }, 200);
@@ -132,8 +132,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearInterval(loadCheckInterval);
-  pixel6StreamUrl.value = null;
-  pi3StreamUrl.value = null;
+  livingRoomStreamUrl.value = null;
+  bedroomStreamUrl.value = null;
 });
 </script>
 
