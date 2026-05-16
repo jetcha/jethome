@@ -33,8 +33,6 @@
           <ClimateChart :data="historyData" dataKey="humidity" />
         </section>
 
-        <div class="spacer" />
-
         <div class="card-parent">
           <div class="card-header"><span>Start Date</span></div>
           <div class="card-content">
@@ -154,7 +152,4 @@ h2 {
   width: 100%;
 }
 
-.spacer {
-  height: 0.2rem;
-}
 </style>

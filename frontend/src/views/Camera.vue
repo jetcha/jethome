@@ -115,7 +115,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { getStreamUrl, ptzControl, getRecordings, getRecordingUrl } from "../api.js";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 7;
 
 const DIRS = [
   { op: "Up", cls: "ptz-up", style: "" },
