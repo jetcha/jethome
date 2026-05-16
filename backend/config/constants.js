@@ -48,6 +48,6 @@ export const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/
 
 // Recording
 export const RECORDINGS_BASE_DIR = "/mnt/pi4cloud";
-export const SEGMENT_DURATION_SECONDS = 1200; // 20 minutes
+export const SEGMENT_DURATION_SECONDS = 1800; // 30 minutes
 export const RETENTION_HOURS = 72;
 export const RETENTION_CLEANUP_INTERVAL_MS = 3600000; // 1 hour
