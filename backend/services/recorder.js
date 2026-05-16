@@ -11,9 +11,20 @@ import {
   FILENAME_PATTERN,
 } from "../config/constants.js";
 
+// If the socket produces no data for this long, FFmpeg gives up and exits
+// (microseconds) — covers a clean disconnect / failed reconnect.
+const SOCKET_TIMEOUT_US = "5000000"; // 5s
+
+// If FFmpeg produces no stderr progress for this long while it's supposed to
+// be recording, the RTSP stream is frozen (half-open TCP after a camera power
+// cycle) — kill it so the exit handler restarts it.
+const WATCHDOG_SILENCE_MS = 15000;
+const WATCHDOG_CHECK_INTERVAL_MS = 5000;
+
 function buildReolinkArgs(rtspUrl, outputPattern) {
   return [
     "-rtsp_transport", "tcp",
+    "-timeout", SOCKET_TIMEOUT_US,
     "-i", rtspUrl,
     "-c:v", "copy",
     "-c:a", "copy",
@@ -31,6 +42,8 @@ const cameras = {
     ffmpegProcess: null,
     cleanupInterval: null,
     restartTimeout: null,
+    watchdogInterval: null,
+    lastOutputAt: 0,
     recording: false,
     dir: "living_room_cam_recordings",
     getArgs(outputPattern) {
@@ -41,6 +54,8 @@ const cameras = {
     ffmpegProcess: null,
     cleanupInterval: null,
     restartTimeout: null,
+    watchdogInterval: null,
+    lastOutputAt: 0,
     recording: false,
     dir: "bedroom_cam_recordings",
     getArgs(outputPattern) {
@@ -70,17 +85,34 @@ export function startRecording(camId) {
   const outputPattern = path.join(dir, "rec_%Y-%m-%d_%H-%M-%S.mp4");
 
   cam.ffmpegProcess = spawn("ffmpeg", cam.getArgs(outputPattern));
+  cam.lastOutputAt = Date.now();
 
   cam.ffmpegProcess.stderr.on("data", (data) => {
+    cam.lastOutputAt = Date.now();
     const msg = data.toString();
     if (msg.includes("Error") || msg.includes("error")) {
       console.error(`[Recorder:${camId}]`, msg.trim());
     }
   });
 
+  cam.watchdogInterval = setInterval(() => {
+    if (!cam.ffmpegProcess) return;
+    if (Date.now() - cam.lastOutputAt > WATCHDOG_SILENCE_MS) {
+      console.error(
+        `[Recorder:${camId}] No output for ${WATCHDOG_SILENCE_MS}ms — stream frozen, killing FFmpeg`
+      );
+      cam.ffmpegProcess.kill("SIGKILL");
+    }
+  }, WATCHDOG_CHECK_INTERVAL_MS);
+
   cam.ffmpegProcess.on("exit", (code) => {
     console.log(`[Recorder:${camId}] FFmpeg exited with code ${code}`);
     cam.ffmpegProcess = null;
+
+    if (cam.watchdogInterval) {
+      clearInterval(cam.watchdogInterval);
+      cam.watchdogInterval = null;
+    }
 
     if (cam.recording) {
       cam.restartTimeout = setTimeout(() => {
@@ -115,6 +147,11 @@ export function stopRecording(camId) {
   if (cam.cleanupInterval) {
     clearInterval(cam.cleanupInterval);
     cam.cleanupInterval = null;
+  }
+
+  if (cam.watchdogInterval) {
+    clearInterval(cam.watchdogInterval);
+    cam.watchdogInterval = null;
   }
 
   if (cam.ffmpegProcess) {
