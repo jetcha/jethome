@@ -31,10 +31,10 @@ export const DATABASE_PATH = "climate_history.db";
 // Main stream (2560x1440, ~3 Mbps): used for recordings (high quality archive)
 const REOLINK_USER = "admin";
 const REOLINK_PASS = "900731doraTKC%23"; // URL-encoded: # -> %23
-export const LIVING_ROOM_CAM_RTSP_URL_SUB = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.90:554/h264Preview_01_sub`;
-export const LIVING_ROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.90:554/h264Preview_01_main`;
-export const BEDROOM_CAM_RTSP_URL_SUB = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.91:554/h264Preview_01_sub`;
-export const BEDROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.91:554/h264Preview_01_main`;
+export const LIVING_ROOM_CAM_RTSP_URL_SUB = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.91:554/h264Preview_01_sub`;
+export const LIVING_ROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.91:554/h264Preview_01_main`;
+export const BEDROOM_CAM_RTSP_URL_SUB = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.90:554/h264Preview_01_sub`;
+export const BEDROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${REOLINK_PASS}@192.168.1.90:554/h264Preview_01_main`;
 
 // Camera
 export const VALID_CAMS = ["living_room_cam", "bedroom_cam"];
