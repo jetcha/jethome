@@ -6,29 +6,30 @@
           {{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : "Camera" }}
         </h1>
         <div class="header-actions">
-          <template v-if="!selectedSegment">
-            <button
-              class="header-btn"
-              :class="{ active: activeCam === 'living_room_cam' }"
-              @click="setCam('living_room_cam')"
-            >
-              LIV
-            </button>
-            <button
-              class="header-btn"
-              :class="{ active: activeCam === 'bedroom_cam' }"
-              @click="setCam('bedroom_cam')"
-            >
-              BED
-            </button>
-          </template>
+          <button class="header-btn refresh-btn" @click="refreshPage">
+            <img src="/refresh.svg" alt="Refresh" class="refresh-icon" />
+          </button>
+          <button
+            class="header-btn"
+            :class="{ active: activeCam === 'living_room_cam' }"
+            @click="setCam('living_room_cam')"
+          >
+            LIV
+          </button>
+          <button
+            class="header-btn"
+            :class="{ active: activeCam === 'bedroom_cam' }"
+            @click="setCam('bedroom_cam')"
+          >
+            BED
+          </button>
           <button class="header-btn" @click="handleBack">BACK</button>
         </div>
       </div>
 
       <div class="content">
-        <!-- Recording playback -->
-        <div v-if="selectedSegment" class="player-section">
+        <!-- Top box: recording player when a segment is selected, else live feed -->
+        <div v-if="selectedSegment" class="camera-feed">
           <video
             :src="videoSrc"
             class="video-player"
@@ -37,73 +38,70 @@
             @ended="playNext"
           />
         </div>
+        <div v-else class="camera-feed" @click="togglePtz">
+          <div v-if="!loaded" class="loading-spinner"></div>
+          <img
+            v-show="loaded"
+            ref="camImg"
+            :src="streamUrl"
+            alt="Live Camera Feed"
+            class="camera-stream"
+          />
 
-        <template v-else>
-          <!-- Live feed with tap-to-toggle PTZ overlay -->
-          <div class="camera-feed" @click="togglePtz">
-            <div v-if="!loaded" class="loading-spinner"></div>
-            <img
-              v-show="loaded"
-              ref="camImg"
-              :src="streamUrl"
-              alt="Live Camera Feed"
-              class="camera-stream"
-            />
-
-            <template v-if="showPtz">
-              <button
-                v-for="dir in DIRS"
-                :key="dir.op"
-                class="ptz-btn"
-                :class="dir.cls"
-                @click.stop
-                @mousedown.stop="start(dir.op)"
-                @mouseup="stop"
-                @mouseleave="stop"
-                @touchstart.stop.prevent="start(dir.op)"
-                @touchend.prevent="stop"
-              >
-                <img src="/chevron-up.svg" class="ptz-icon" :style="dir.style" />
-              </button>
-            </template>
-          </div>
-
-          <!-- Recordings list -->
-          <div v-if="loadingList" class="loading-spinner"></div>
-          <div v-else-if="segments.length === 0" class="recordings-empty">
-            No recordings available
-          </div>
-          <template v-else>
-            <div
-              v-for="seg in pagedSegments"
-              :key="seg.filename"
-              class="segment-row"
-              @click="selectSegment(seg)"
+          <template v-if="showPtz">
+            <button
+              v-for="dir in DIRS"
+              :key="dir.op"
+              class="ptz-btn"
+              :class="dir.cls"
+              @click.stop
+              @mousedown.stop="start(dir.op)"
+              @mouseup="stop"
+              @mouseleave="stop"
+              @touchstart.stop.prevent="start(dir.op)"
+              @touchend.prevent="stop"
             >
-              <span class="segment-time">{{ formatTimestamp(seg.timestamp) }}</span>
-              <span class="segment-size">{{ formatSize(seg.size) }}</span>
-            </div>
-            <div
-              v-for="n in PAGE_SIZE - pagedSegments.length"
-              :key="'placeholder-' + n"
-              class="segment-row placeholder"
-            >
-              &nbsp;
-            </div>
-            <div v-if="totalPages > 1" class="pagination">
-              <button class="header-btn" :disabled="page === 0" @click="page--">
-                PREV
-              </button>
-              <span class="page-info">{{ page + 1 }} / {{ totalPages }}</span>
-              <button
-                class="header-btn"
-                :disabled="page >= totalPages - 1"
-                @click="page++"
-              >
-                NEXT
-              </button>
-            </div>
+              <img src="/chevron-up.svg" class="ptz-icon" :style="dir.style" />
+            </button>
           </template>
+        </div>
+
+        <!-- Recordings list (always visible) -->
+        <div v-if="loadingList" class="loading-spinner"></div>
+        <div v-else-if="segments.length === 0" class="recordings-empty">
+          No recordings available
+        </div>
+        <template v-else>
+          <div
+            v-for="seg in pagedSegments"
+            :key="seg.filename"
+            class="segment-row"
+            :class="{ active: selectedSegment && selectedSegment.filename === seg.filename }"
+            @click="selectSegment(seg)"
+          >
+            <span class="segment-time">{{ formatTimestamp(seg.timestamp) }}</span>
+            <span class="segment-size">{{ formatSize(seg.size) }}</span>
+          </div>
+          <div
+            v-for="n in PAGE_SIZE - pagedSegments.length"
+            :key="'placeholder-' + n"
+            class="segment-row placeholder"
+          >
+            &nbsp;
+          </div>
+          <div v-if="totalPages > 1" class="pagination">
+            <button class="header-btn" :disabled="page === 0" @click="page--">
+              PREV
+            </button>
+            <span class="page-info">{{ page + 1 }} / {{ totalPages }}</span>
+            <button
+              class="header-btn"
+              :disabled="page >= totalPages - 1"
+              @click="page++"
+            >
+              NEXT
+            </button>
+          </div>
         </template>
       </div>
     </div>
@@ -161,7 +159,13 @@ function handleBack() {
   }
 }
 
+function refreshPage() {
+  window.location.reload();
+}
+
 function setCam(camId) {
+  // Tapping a camera (even the active one) returns to its live feed
+  selectedSegment.value = null;
   if (activeCam.value === camId) return;
   stop();
   showPtz.value = false;
@@ -318,15 +322,20 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
 }
 
-.player-section {
-  margin-bottom: 1.5rem;
-}
-
+/* Recording player occupies the same footprint as the live feed box;
+   contain (not cover) so 16:9 recordings letterbox instead of cropping. */
 .video-player {
   width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
-  border-radius: 0.5rem;
   background: #000;
+}
+
+.refresh-icon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
 }
 
 .recordings-empty {
@@ -347,6 +356,11 @@ onBeforeUnmount(() => {
 
 .segment-row:not(.placeholder):hover {
   background: #f0f0f0;
+}
+
+.segment-row.active {
+  background: #1c1c1c;
+  color: #fff;
 }
 
 .segment-row.placeholder {
