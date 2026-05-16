@@ -4,9 +4,6 @@
       <div class="page-header">
         <h1 class="page-title">Camera</h1>
         <div class="header-actions">
-          <button class="header-btn refresh-btn" @click="refreshPage">
-            <img src="/refresh.svg" alt="Refresh" class="refresh-icon" />
-          </button>
           <button
             class="header-btn"
             :class="{ active: activeCam === 'living_room_cam' }"
@@ -65,7 +62,7 @@
         </div>
 
         <!-- Recordings list (always visible) -->
-        <div v-if="loadingList" class="loading-spinner"></div>
+        <div v-if="loadingList" class="loading-spinner list-loading"></div>
         <div v-else-if="segments.length === 0" class="recordings-empty">
           No recordings available
         </div>
@@ -155,10 +152,6 @@ function handleBack() {
   } else {
     router.push("/dashboard");
   }
-}
-
-function refreshPage() {
-  window.location.reload();
 }
 
 function setCam(camId) {
@@ -274,8 +267,8 @@ onBeforeUnmount(() => {
 
 .ptz-btn {
   position: absolute;
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 2.24rem;
+  height: 2.24rem;
   border: none;
   border-radius: 50%;
   background: #fff;
@@ -294,8 +287,8 @@ onBeforeUnmount(() => {
 }
 
 .ptz-icon {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.12rem;
+  height: 1.12rem;
   display: block;
 }
 
@@ -330,16 +323,22 @@ onBeforeUnmount(() => {
   background: #000;
 }
 
-.refresh-icon {
-  width: 1rem;
-  height: 1rem;
-  display: block;
+
+/* Match the height of a full list (7 rows + pager) so the spinner
+   centers where the list will appear instead of collapsing to the top. */
+.list-loading {
+  min-height: 17rem;
+  padding: 0;
 }
 
 .recordings-empty {
   color: #999;
   text-align: center;
   padding: 2rem 0;
+  min-height: 17rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .segment-row {
@@ -348,17 +347,10 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 0.5rem 0rem;
   cursor: pointer;
-  border-radius: 0.5rem;
-  transition: background 0.15s;
-}
-
-.segment-row:not(.placeholder):hover {
-  background: #f0f0f0;
 }
 
 .segment-row.active {
-  background: #1c1c1c;
-  color: #fff;
+  font-weight: 700;
 }
 
 .segment-row.placeholder {
