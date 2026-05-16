@@ -255,7 +255,7 @@ onBeforeUnmount(() => {
 .camera-feed {
   position: relative;
   overflow: hidden;
-  margin: 0 auto 1rem;
+  margin: 0 auto 0.7rem;
   aspect-ratio: 7 / 4;
   width: 100%;
 }
@@ -367,7 +367,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.7rem;
 }
 
 .page-info {
