@@ -2,9 +2,7 @@
   <div class="page-wrapper">
     <div class="page-container">
       <div class="page-header">
-        <h1 class="page-title">
-          {{ selectedSegment ? formatTimestamp(selectedSegment.timestamp) : "Camera" }}
-        </h1>
+        <h1 class="page-title">Camera</h1>
         <div class="header-actions">
           <button class="header-btn refresh-btn" @click="refreshPage">
             <img src="/refresh.svg" alt="Refresh" class="refresh-icon" />
