@@ -6,6 +6,7 @@ import {
   getRecordingsPath,
   getSegments,
 } from "../services/recorder.js";
+import { ptzControl } from "../services/ptz.js";
 import {
   LIVING_ROOM_CAM_RTSP_URL_SUB,
   BEDROOM_CAM_RTSP_URL_SUB,
@@ -122,6 +123,25 @@ router.get("/cam/:camId/video", (req, res) => {
   req.on("close", () => {
     ffmpeg.kill("SIGINT");
   });
+});
+
+// PTZ control (pan/tilt). op = Up | Down | Left | Right | Stop
+const PTZ_OPS = ["Up", "Down", "Left", "Right", "Stop"];
+router.post("/cam/:camId/ptz", async (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  const { camId } = req.params;
+  if (!VALID_CAMS.includes(camId)) return res.status(400).json({ error: "Invalid camera" });
+
+  const { op } = req.body;
+  if (!PTZ_OPS.includes(op)) return res.status(400).json({ error: "Invalid op" });
+
+  try {
+    await ptzControl(camId, op);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(`[PTZ:${camId}]`, e.message);
+    res.status(502).json({ error: "PTZ command failed" });
+  }
 });
 
 // List recordings

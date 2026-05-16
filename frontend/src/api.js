@@ -109,6 +109,13 @@ export async function getClimateHistoryByRange(location, from, to) {
   );
 }
 
+export async function ptzControl(camId, op) {
+  return api(`/api/cam/${camId}/ptz`, {
+    method: "POST",
+    body: JSON.stringify({ op }),
+  });
+}
+
 export async function getRecordings(camId) {
   return api(`/api/cam/${camId}/recordings`);
 }
