@@ -267,9 +267,9 @@ onBeforeUnmount(() => {
 
 .ptz-btn {
   position: absolute;
-  width: 2.24rem;
-  height: 2.24rem;
-  border: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid #1c1c1c;
   border-radius: 50%;
   background: #fff;
   display: flex;
@@ -287,8 +287,8 @@ onBeforeUnmount(() => {
 }
 
 .ptz-icon {
-  width: 1.12rem;
-  height: 1.12rem;
+  width: 1.1rem;
+  height: 1.1rem;
   display: block;
 }
 
