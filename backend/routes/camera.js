@@ -68,6 +68,7 @@ router.get("/cam/:camId/video", (req, res) => {
     "-probesize", "32",          // Minimal probing (faster startup)
     "-analyzeduration", "0",     // Skip input analysis delay
     "-rtsp_transport", "tcp",
+    "-timeout", "5000000",       // 5s socket timeout: fail fast if RTSP stalls
     "-i", rtspUrl,
     "-vf", "scale=640:-2",
     "-f", "mjpeg",
@@ -76,6 +77,17 @@ router.get("/cam/:camId/video", (req, res) => {
     "-an",
     "pipe:1",
   ]);
+
+  // Watchdog: if ffmpeg produces no output for 10s (stuck on a dead/maxed-out
+  // RTSP connection), kill it and end the response so the camera session is
+  // freed and the client can retry instead of spinning forever.
+  let lastOutputAt = Date.now();
+  const watchdog = setInterval(() => {
+    if (Date.now() - lastOutputAt > 10000) {
+      console.error(`[${camId} stream] no output for 10s — killing ffmpeg`);
+      ffmpeg.kill("SIGKILL");
+    }
+  }, 3000);
 
   res.writeHead(200, {
     "Content-Type": `multipart/x-mixed-replace; boundary=${boundary}`,
@@ -90,6 +102,7 @@ router.get("/cam/:camId/video", (req, res) => {
   let sending = false;
 
   ffmpeg.stdout.on("data", (chunk) => {
+    lastOutputAt = Date.now();
     buffer = Buffer.concat([buffer, chunk]);
 
     // Extract all complete frames, but only keep the latest one
@@ -118,6 +131,7 @@ router.get("/cam/:camId/video", (req, res) => {
   });
 
   ffmpeg.stderr.on("data", (data) => {
+    lastOutputAt = Date.now();
     const msg = data.toString();
     if (msg.includes("Error") || msg.includes("error")) {
       console.error(`[${camId} stream]`, msg.trim());
@@ -125,10 +139,12 @@ router.get("/cam/:camId/video", (req, res) => {
   });
 
   ffmpeg.on("exit", () => {
+    clearInterval(watchdog);
     if (!res.writableEnded) res.end();
   });
 
   req.on("close", () => {
+    clearInterval(watchdog);
     ffmpeg.kill("SIGINT");
   });
 });
