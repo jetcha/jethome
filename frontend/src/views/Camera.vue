@@ -66,14 +66,22 @@
               <img src="/chevron-up.svg" class="ptz-icon" :style="dir.style" />
             </button>
 
-            <div class="pos-save">
-              <button class="pos-btn" @click.stop="savePos('normal')">
-                NORMAL
-              </button>
-              <button class="pos-btn" @click.stop="savePos('privacy')">
-                PRIVACY
-              </button>
-            </div>
+            <button
+              class="pos-btn pos-normal"
+              :disabled="saving.normal"
+              @click.stop="savePos('normal')"
+            >
+              <span v-if="saving.normal" class="btn-spinner"></span>
+              <span v-else>NORMAL</span>
+            </button>
+            <button
+              class="pos-btn pos-privacy"
+              :disabled="saving.privacy"
+              @click.stop="savePos('privacy')"
+            >
+              <span v-if="saving.privacy" class="btn-spinner"></span>
+              <span v-else>PRIVACY</span>
+            </button>
           </template>
         </div>
 
@@ -120,7 +128,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import {
   getStreamUrl,
@@ -147,6 +155,7 @@ const loaded = ref(false);
 const camImg = ref(null);
 const showPtz = ref(false);
 const privacyOn = ref(false);
+const saving = reactive({ normal: false, privacy: false });
 let loadCheckInterval = null;
 let moving = false;
 
@@ -216,10 +225,14 @@ async function stop() {
 }
 
 async function savePos(slot) {
+  if (saving[slot]) return;
+  saving[slot] = true;
   try {
     await savePreset(activeCam.value, slot);
   } catch (e) {
     console.error("Save position failed:", e);
+  } finally {
+    saving[slot] = false;
   }
 }
 
@@ -368,25 +381,45 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
 }
 
-.pos-save {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  gap: 0.8rem;
-}
-
+/* Nav-button shape (pill), PTZ-style transparent dark bg, white text */
 .pos-btn {
+  position: absolute;
+  bottom: 0.3rem;
   border: none;
-  background: transparent;
+  border-radius: 1rem;
+  background: rgba(28, 28, 28, 0.45);
   color: #fff;
   font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  font-weight: 400;
+  padding: 0.4rem 0.7rem;
+  min-width: 4.8rem;
+  height: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.pos-btn:active {
+  background: rgba(28, 28, 28, 0.7);
+}
+
+.pos-normal {
+  left: 0.3rem;
+}
+
+.pos-privacy {
+  right: 0.3rem;
+}
+
+.btn-spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
 .eye-btn {
