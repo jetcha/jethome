@@ -75,20 +75,41 @@ async function getToken(camId) {
   return login(camId);
 }
 
-export async function ptzControl(camId, op) {
+// Runs an authenticated CGI command, retrying once if a cached token went
+// stale (camera reboot). Throws if the camera rejects the command.
+async function runCmd(camId, cmd, payload) {
   const host = HOSTS[camId];
   if (!host) throw new Error("Invalid camera");
 
-  const param =
-    op === "Stop" ? { channel: 0, op: "Stop" } : { channel: 0, op, speed: 32 };
-  const payload = [{ cmd: "PtzCtrl", action: 0, param }];
-
-  // Retry once: a cached token can be invalidated by a camera reboot.
   for (let attempt = 0; attempt < 2; attempt++) {
     const token = await getToken(camId);
-    const resp = await postJson(host, `cmd=PtzCtrl&token=${token}`, payload);
-    if (resp?.[0]?.code === 0) return;
+    const resp = await postJson(host, `cmd=${cmd}&token=${token}`, payload);
+    if (resp?.[0]?.code === 0) return resp;
     delete tokens[camId];
   }
-  throw new Error("PTZ command rejected by camera");
+  throw new Error(`${cmd} rejected by camera`);
+}
+
+export async function ptzControl(camId, op) {
+  const param =
+    op === "Stop" ? { channel: 0, op: "Stop" } : { channel: 0, op, speed: 32 };
+  return runCmd(camId, "PtzCtrl", [{ cmd: "PtzCtrl", action: 0, param }]);
+}
+
+// Save the camera's CURRENT physical position into a preset slot.
+export async function setPreset(camId, id, name) {
+  return runCmd(camId, "SetPtzPreset", [
+    {
+      cmd: "SetPtzPreset",
+      action: 0,
+      param: { PtzPreset: { channel: 0, enable: 1, id, name } },
+    },
+  ]);
+}
+
+// Move the camera to a previously-saved preset slot.
+export async function gotoPreset(camId, id) {
+  return runCmd(camId, "PtzCtrl", [
+    { cmd: "PtzCtrl", action: 0, param: { channel: 0, op: "ToPos", id, speed: 32 } },
+  ]);
 }

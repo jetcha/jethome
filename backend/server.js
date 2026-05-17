@@ -3,6 +3,7 @@ import cors from "cors";
 import { PORT, SUN_TIME_UPDATE_INTERVAL_MS } from "./config/constants.js";
 import { initMqtt, syncDarknessState } from "./services/mqtt.js";
 import { startRecording, stopRecording } from "./services/recorder.js";
+import { isPrivacyEnabled } from "./services/privacy.js";
 import authRoutes from "./routes/auth.js";
 import alarmRoutes from "./routes/alarm.js";
 
@@ -27,9 +28,13 @@ app.use("/api", pushRoutes);
 // Initialize MQTT
 initMqtt();
 
-// Always-on recording
-startRecording("living_room_cam");
-startRecording("bedroom_cam");
+// Always-on recording, unless privacy mode was left enabled
+if (!isPrivacyEnabled()) {
+  startRecording("living_room_cam");
+  startRecording("bedroom_cam");
+} else {
+  console.log("[Privacy] enabled at boot — recording suspended");
+}
 
 // Sync darkness state every minute
 setInterval(syncDarknessState, SUN_TIME_UPDATE_INTERVAL_MS);

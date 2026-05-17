@@ -42,6 +42,10 @@ export const LIVING_ROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${PASS_ENC}
 export const BEDROOM_CAM_RTSP_URL_SUB = `rtsp://${REOLINK_USER}:${PASS_ENC}@${BEDROOM_CAM_HOST}:554/h264Preview_01_sub`;
 export const BEDROOM_CAM_RTSP_URL_MAIN = `rtsp://${REOLINK_USER}:${PASS_ENC}@${BEDROOM_CAM_HOST}:554/h264Preview_01_main`;
 
+// PTZ preset slots (Reolink preset ids; verified present 0-63 via GetPtzPreset)
+export const NORMAL_PRESET_ID = 0;
+export const PRIVACY_PRESET_ID = 1;
+
 // Camera
 export const VALID_CAMS = ["living_room_cam", "bedroom_cam"];
 export const FILENAME_PATTERN = /^rec_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mp4$/;

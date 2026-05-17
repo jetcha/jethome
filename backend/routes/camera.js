@@ -6,13 +6,21 @@ import {
   getRecordingsPath,
   getSegments,
 } from "../services/recorder.js";
-import { ptzControl } from "../services/ptz.js";
+import { ptzControl, setPreset } from "../services/ptz.js";
+import { isPrivacyEnabled, setPrivacy } from "../services/privacy.js";
 import {
   LIVING_ROOM_CAM_RTSP_URL_SUB,
   BEDROOM_CAM_RTSP_URL_SUB,
   VALID_CAMS,
   FILENAME_PATTERN,
+  NORMAL_PRESET_ID,
+  PRIVACY_PRESET_ID,
 } from "../config/constants.js";
+
+const PRESET_SLOTS = {
+  normal: { id: NORMAL_PRESET_ID, name: "Normal" },
+  privacy: { id: PRIVACY_PRESET_ID, name: "Privacy" },
+};
 
 // Live feed uses the sub-stream (low-res, low-bandwidth). Recordings use main (see recorder.js).
 const RTSP_URLS = {
@@ -141,6 +149,42 @@ router.post("/cam/:camId/ptz", async (req, res) => {
   } catch (e) {
     console.error(`[PTZ:${camId}]`, e.message);
     res.status(502).json({ error: "PTZ command failed" });
+  }
+});
+
+// Save the camera's current position into a preset slot. slot = normal | privacy
+router.post("/cam/:camId/preset", async (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  const { camId } = req.params;
+  if (!VALID_CAMS.includes(camId)) return res.status(400).json({ error: "Invalid camera" });
+
+  const preset = PRESET_SLOTS[req.body.slot];
+  if (!preset) return res.status(400).json({ error: "Invalid slot" });
+
+  try {
+    await setPreset(camId, preset.id, preset.name);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(`[Preset:${camId}]`, e.message);
+    res.status(502).json({ error: "Save preset failed" });
+  }
+});
+
+// Privacy mode is global (both cameras together).
+router.get("/privacy", (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  res.json({ enabled: isPrivacyEnabled() });
+});
+
+router.post("/privacy", async (req, res) => {
+  if (!authenticateAdmin(req, res)) return;
+  const enabled = req.body.enabled === true;
+  try {
+    await setPrivacy(enabled);
+    res.json({ enabled: isPrivacyEnabled() });
+  } catch (e) {
+    console.error("[Privacy]", e.message);
+    res.status(502).json({ error: "Privacy toggle failed" });
   }
 });
 

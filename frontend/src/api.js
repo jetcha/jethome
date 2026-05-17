@@ -116,6 +116,24 @@ export async function ptzControl(camId, op) {
   });
 }
 
+export async function savePreset(camId, slot) {
+  return api(`/api/cam/${camId}/preset`, {
+    method: "POST",
+    body: JSON.stringify({ slot }),
+  });
+}
+
+export async function getPrivacy() {
+  return api(`/api/privacy`);
+}
+
+export async function setPrivacy(enabled) {
+  return api(`/api/privacy`, {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+}
+
 export async function getRecordings(camId) {
   return api(`/api/cam/${camId}/recordings`);
 }

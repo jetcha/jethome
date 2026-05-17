@@ -5,6 +5,13 @@
         <h1 class="page-title">Camera</h1>
         <div class="header-actions">
           <button
+            class="header-btn eye-btn"
+            :class="{ active: privacyOn }"
+            @click="togglePrivacy"
+          >
+            <img src="/eye.svg" alt="Privacy" class="eye-icon" />
+          </button>
+          <button
             class="header-btn"
             :class="{ active: activeCam === 'living_room_cam' }"
             @click="setCam('living_room_cam')"
@@ -58,6 +65,15 @@
             >
               <img src="/chevron-up.svg" class="ptz-icon" :style="dir.style" />
             </button>
+
+            <div class="pos-save">
+              <button class="pos-btn" @click.stop="savePos('normal')">
+                NORMAL
+              </button>
+              <button class="pos-btn" @click.stop="savePos('privacy')">
+                PRIVACY
+              </button>
+            </div>
           </template>
         </div>
 
@@ -106,7 +122,15 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { getStreamUrl, ptzControl, getRecordings, getRecordingUrl } from "../api.js";
+import {
+  getStreamUrl,
+  ptzControl,
+  getRecordings,
+  getRecordingUrl,
+  savePreset,
+  getPrivacy,
+  setPrivacy,
+} from "../api.js";
 
 const PAGE_SIZE = 7;
 
@@ -122,6 +146,7 @@ const activeCam = ref("living_room_cam");
 const loaded = ref(false);
 const camImg = ref(null);
 const showPtz = ref(false);
+const privacyOn = ref(false);
 let loadCheckInterval = null;
 let moving = false;
 
@@ -190,6 +215,26 @@ async function stop() {
   }
 }
 
+async function savePos(slot) {
+  try {
+    await savePreset(activeCam.value, slot);
+  } catch (e) {
+    console.error("Save position failed:", e);
+  }
+}
+
+async function togglePrivacy() {
+  const next = !privacyOn.value;
+  privacyOn.value = next; // optimistic
+  try {
+    const res = await setPrivacy(next);
+    privacyOn.value = res.enabled;
+  } catch (e) {
+    console.error("Privacy toggle failed:", e);
+    privacyOn.value = !next; // revert on failure
+  }
+}
+
 function selectSegment(seg) {
   selectedSegment.value = seg;
 }
@@ -231,8 +276,18 @@ async function fetchRecordings() {
   }
 }
 
+async function fetchPrivacy() {
+  try {
+    const res = await getPrivacy();
+    privacyOn.value = res.enabled;
+  } catch (e) {
+    console.error("Failed to fetch privacy state:", e);
+  }
+}
+
 onMounted(() => {
   fetchRecordings();
+  fetchPrivacy();
   loadCheckInterval = setInterval(() => {
     if (camImg.value && camImg.value.naturalWidth > 0) {
       loaded.value = true;
@@ -269,48 +324,85 @@ onBeforeUnmount(() => {
   position: absolute;
   width: 2.2rem;
   height: 2.2rem;
-  border: 1px solid #1c1c1c;
+  border: none;
   border-radius: 50%;
-  background: #fff;
+  background: rgba(28, 28, 28, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .ptz-btn:active {
-  background: #e0e0e0;
+  background: rgba(28, 28, 28, 0.7);
 }
 
 .ptz-icon {
   width: 1.1rem;
   height: 1.1rem;
   display: block;
+  filter: invert(1); /* black SVG -> white arrows */
 }
 
 .ptz-up {
-  top: 0.6rem;
+  top: 0.3rem;
   left: 50%;
   transform: translateX(-50%);
 }
 .ptz-down {
-  bottom: 0.6rem;
+  bottom: 0.3rem;
   left: 50%;
   transform: translateX(-50%);
 }
 .ptz-left {
-  left: 0.6rem;
+  left: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
 }
 .ptz-right {
-  right: 0.6rem;
+  right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.pos-save {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 0.8rem;
+}
+
+.pos-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.eye-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.eye-btn.active .eye-icon {
+  filter: invert(1); /* white eye when privacy active (dark btn bg) */
 }
 
 /* Recording player occupies the same footprint as the live feed box;
